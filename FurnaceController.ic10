@@ -1,4 +1,6 @@
-#Automatic Advanced Furnace Controller CowsAreEvil
+#Automatic Advanced Furnace Controller by CowsAreEvil
+#https://steamcommunity.com/sharedfiles/filedetails/?id=2520700872
+#this version has no automatic ejection of processed items
 alias furnace d0
 alias button d1
 alias hotpump d2

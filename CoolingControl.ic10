@@ -1,25 +1,26 @@
 #Cooling Control
 
-alias coldtank d0
-alias intakepump d1
-alias valve d2
+alias coolingTank d0
+alias intakePump d1 # used for filling the tank
+alias coolingValve d2 # valve that connects to the cooling pipe
 
 define MAXPRESSURE 20000
-define COLDTEMP 300
+define TARGETTEMP 300
 
-start:
-#check for cold topup
-l r0 coldtank Pressure
+main:
+# check pressure
+l r0 coolingTank Pressure
 slt r0 r0 MAXPRESSURE
-l r1 coldtank Temperature
-slt r1 r1 COLDTEMP
+l r1 coolingTank Temperature
+slt r1 r1 TARGETTEMP
 and r0 r0 r1
-s intakepump On r0
-s intakepump Setting 100
+s intakePump On r0
+s intakePump Setting 100
+
 #check cold temp
-l r0 coldtank Temperature
-sgt r0 r0 COLDTEMP
-s valve On r0
+l r0 coolingTank Temperature
+sgt r0 r0 TARGETTEMP
+s coolingValve On r0
 
 yield
-j start
+j main

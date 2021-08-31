@@ -1,4 +1,8 @@
 # O2 Control
+# Extracts O2 from the air until
+# - a min Pressure of 60kpa
+# - a O2 ratio of 25% is reached
+# - O2 Pipe reaches maximum Pressure
 
 define FILTRATION -348054045
 

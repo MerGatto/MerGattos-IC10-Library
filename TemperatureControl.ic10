@@ -1,4 +1,8 @@
-#Temperature Control
+# Temperature Control
+# Automatically opens/closes heat and cooling valves
+# to try and reach the target temperature
+# intake pump and target temperature are optional
+
 alias targetPipe d0
 alias coolValve d1
 alias heatValve d2

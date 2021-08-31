@@ -1,3 +1,4 @@
+# controls all vents and filtration units to fill a pipe until 20MP
 define FILTRATION -348054045
 define VENT -1129453144
 
@@ -8,8 +9,7 @@ alias dPipeAnalyzer d0
 alias vPressure r15
 alias vActive r14
 
-s db Setting 0
-start:
+main:
 sb VENT PressureInternal MAXPRESSURE
 sb VENT Mode 1
 
@@ -18,4 +18,4 @@ sle vActive vPressure MAXPRESSURE
 sb FILTRATION On vActive
 sb VENT On vActive
 yield
-j start
+j main

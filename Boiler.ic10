@@ -1,4 +1,7 @@
-#Automatic Advanced Furnace Gas Heater CowsAreEvil
+# Slightly adapted version of CowsAreEvil's
+# Gas Heater https://steamcommunity.com/sharedfiles/filedetails/?id=2520701390
+# this version requires ready to use fuel
+
 alias hottank d0
 alias hottopup d1
 alias boiler d2
@@ -8,7 +11,6 @@ alias wastetank d5
 
 define MAXPRESSURE 20000
 define HOTTEMP 2000
-define VPMODE 1
 define IGNITETMP 50
 
 s db Setting 0
@@ -40,7 +42,6 @@ sge r1 r1 500
 and r0 r0 r1
 s extractorpump On r0
 s extractorpump Setting 1000
-s extractorpump Mode VPMODE
 #turn on fuel pump but only when extractor is not ru
 nor r0 r0 r0
 l r1 hottank Pressure

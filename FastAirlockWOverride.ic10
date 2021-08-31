@@ -2,8 +2,8 @@ alias dDoorIn d0
 alias dDoorOut d1
 alias dVentIn d2
 alias dVentOut d3
-alias dOverride1 d4
-alias dOverride2 d5
+alias dOverride1 d4 # manual override lever 1 (both need to be active for manual override)
+alias dOverride2 d5 # manual override lever 2 (both need to be active for manual override)
 define GASSENSOR -1252983604
 define MOTIONSENSOR -1713470563
 alias openDoor r15
@@ -13,7 +13,8 @@ alias overrideActive r12
 alias temperature r11
 define DVENTIN 2
 define DVENTOUT 3
-define CRITTEMP 323 #50 degree
+define CRITHIGHTEMP 323 #50 degree, will close all doors when manual mode is active and this temperature is exceeded
+define CRITLOWTEMP 288 #15 degree, will close all doors when manual mode is active and this temperature is exceeded
 
 s dDoorIn Lock 0
 s dDoorOut Lock 0
@@ -35,8 +36,7 @@ l r3 dDoorOut Open
 s dDoorOut Setting r3
 alias noPerson r4
 move noPerson 1
-
-loop:
+loop: # MAIN loop
 yield
 bdns dDoorIn error
 bdns dDoorOut error
@@ -44,8 +44,8 @@ bdns dVentIn error
 bdns dVentOut error
 lb pressure GASSENSOR Pressure 1 #Batch sum
 lb temperature GASSENSOR Temperature 0 #Batch Average
-jal checkOverride
-bnez overrideActive override
+jal checkOverride # check for manual override
+bnez overrideActive manualOverride
 s dDoorIn Mode 1
 s dDoorOut Mode 1
 jal resetPerson
@@ -76,7 +76,7 @@ s dDoorIn Lock 1
 beqz openDoor runToOut
 j runToIn
 
-runToIn:
+runToIn: # opens the inner door
 s dDoorOut Open 0
 s dDoorOut Setting 0
 move r8 DVENTOUT
@@ -84,8 +84,7 @@ jal activateVent
 s dDoorIn Open 1
 s dDoorIn Setting 1
 j runFinish
-
-runToOut:
+runToOut: # opens outer door
 s dDoorIn Open 0
 s dDoorIn Setting 0
 move r8 DVENTIN
@@ -93,24 +92,20 @@ jal activateVent
 s dDoorOut Open 1
 s dDoorOut Setting 1
 j runFinish
-
-activateVent:
+activateVent: # activates current Vent
 s dr8 On 1
-innerLoop:
-#yield
+innerLoop: # Depressurize Loop
 lb pressure GASSENSOR Pressure 1 # Batch Sum
 bgt pressure 0 innerLoop
-#yield
 s dr8 On 0
 j ra
-
-runFinish:
+runFinish: # runFinish
 s dDoorOut Lock 0
 s dDoorIn Lock 0
 j loop
-
-override:
-bgt temperature CRITTEMP runToIn
+manualOverride: #Activates manual Control of doors
+bgt temperature CRITHIGHTEMP EmergencyProtocol
+blt temperature CRITLOWTEMP EmergencyProtocol
 s dDoorIn Lock 0
 s dDoorOut Lock 0
 s dDoorIn Mode 0
@@ -124,5 +119,9 @@ l overrideActive dOverride1 Setting
 l r0 dOverride2 Setting
 and overrideActive overrideActive r0
 j ra
+EmergencyProtocol:
+s dDoorOut Open 0
+s dDoorIn Open 0
+j loop
 error:
 asd

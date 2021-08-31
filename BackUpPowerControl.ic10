@@ -1,4 +1,8 @@
 # Constants
+# Reads the Charge Percentage of all connected Station Batteries
+# and writes it to the connected display
+# Activates a Backup Generator when the Power falls too low
+
 define cHighCharge 50
 define cLowCharge 10
 
@@ -56,7 +60,7 @@ s dDisplay Mode 1
 
 bgt vChargePerc 99 maxCharge
 bgt vChargePerc 80 highcharge
-bgt vChargePerc 40 mediumcharge
+bgt vChargePerc 25 mediumcharge
 s dDisplay Color 4
 j ra
 

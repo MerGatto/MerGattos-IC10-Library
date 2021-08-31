@@ -1,6 +1,6 @@
-alias paH2 d0 #PipeAnalyser for input pipe 1
-alias paO2 d1 #PipeAnalyser for input pipe 2
-alias mixer d2
+alias paH2 d0 #PipeAnalyser for input pipe 1 (H2)
+alias paO2 d1 #PipeAnalyser for input pipe 2 (O2)
+alias mixer d2 #H2 Has to go in Input slot 1 of the mixer
 alias paFuel d3
 
 define RATIO 2
@@ -9,7 +9,7 @@ define MAXPRESSURE 20000
 alias tempO2 r15
 alias tempH2 r14
 
-start:
+main:
 l tempH2 paH2 Temperature
 l tempO2 paO2 Temperature
 l r2 paH2 TotalMoles
@@ -29,8 +29,8 @@ bgt tempH2 315 off
 bgt tempO2 315 off
 s mixer On 1
 yield
-j start
+j main
 
 off:
 s mixer On 0
-j start
+j main

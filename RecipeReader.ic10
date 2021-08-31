@@ -1,3 +1,8 @@
+# Recipe Reader
+# Reads the Reagent for the selected Ingot from the DIAL
+# Needs Housing that has been written to with the Stack Writer:
+# https://steamcommunity.com/sharedfiles/filedetails/?id=2520701196
+
 define DIAL 554524804
 start:
 lb sp DIAL Setting Average

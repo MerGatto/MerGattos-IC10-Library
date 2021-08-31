@@ -1,4 +1,5 @@
-# H2 Vulcan Control
+# H2 Filter Control for Vulcan
+# turns vents off during the day
 
 define FILTRATION -348054045
 
