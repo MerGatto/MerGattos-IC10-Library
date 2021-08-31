@@ -1,0 +1,120 @@
+#Automatic Advanced Furnace Controller CowsAreEvil
+alias furnace d0
+alias button d1
+alias hotpump d2
+alias coldpump d3
+alias hotsensor d4
+alias coldsensor d5
+define DIAL 554524804
+define LED 1944485013
+alias hotsetting r5
+alias coldsetting r6
+alias inputspeed r7
+alias inputtemp r8
+alias inputmoles r9
+alias ingothash r10
+alias mintemp r11
+alias maxtemp r12
+alias minpress r13
+alias maxpress r14
+alias light r15
+start:
+yield
+s furnace SettingOutput 0
+s hotpump Setting 0
+s coldpump Setting 0
+sb LED Color light
+move light 2  #Set to green
+#load data
+lb sp DIAL Setting Average
+mul sp sp 9
+add sp sp 5
+pop maxpress
+pop minpress
+pop maxtemp
+pop mintemp
+pop ingothash
+s db Setting ingothash
+#check button
+l r0 button Setting
+bnez r0 sendmaterials
+# Check pressure and temp in alloy zone
+l r0 furnace Pressure
+bgt r0 maxpress makeadjustment
+blt r0 minpress makeadjustment
+l r0 furnace Temperature
+bgt r0 maxtemp makeadjustment
+blt r0 mintemp makeadjustment
+j start
+makeadjustment:
+#find input gas temp
+l r0 furnace TotalMoles
+max r0 r0 0.1
+l r1 furnace Pressure
+max r1 r1 0.1
+l r2 furnace Temperature
+max r2 r2 0.1
+div inputtemp r0 r1
+mul inputtemp inputtemp r2
+mul inputtemp inputtemp minpress #target energy
+div inputmoles inputtemp mintemp #target moles
+sub inputmoles inputmoles r0 #moles needed
+mul r0 r0 r2 #current energy
+sub inputtemp inputtemp r0 #energy needed
+div inputtemp inputtemp inputmoles #input temperatur
+slez r0 inputmoles
+select light r0 6 light
+blez inputmoles reducepressure
+add inputtemp inputtemp 5
+#Calculate cold pump settings
+l r0 hotsensor Temperature
+sgt r1 inputtemp r0
+select light r1 10 light  #Set to pink
+sub coldsetting r0 inputtemp
+div coldsetting coldsetting r0
+l r0 coldsensor Pressure
+div coldsetting coldsetting r0
+#Calculate hot pump setting
+l r0 coldsensor Temperature
+slt r1 inputtemp r0
+select light r1 11 light  #Set to purple
+sub hotsetting inputtemp r0
+div hotsetting hotsetting r0
+l r0 hotsensor Pressure
+div hotsetting hotsetting r0
+#Throttle down foe target pressure
+l r0 furnace Pressure
+sub r0 minpress r0
+div r0 r0 70  #input gain
+max r0 r0 0
+min inputspeed r0 50
+add r0 hotsetting coldsetting
+div r0 inputspeed r0
+mul hotsetting hotsetting r0
+mul coldsetting coldsetting r0
+#Dump pressure if required
+blez coldsetting reducepressure
+blez hotsetting reducepressure
+#Activate pumps
+s coldpump Setting coldsetting
+s hotpump Setting hotsetting
+j start
+reducepressure:
+s furnace SettingOutput 50
+j start
+sendmaterials:
+lb sp DIAL Setting Average
+mul sp sp 9
+add sp sp 9
+pop r0
+sb VEND RequestHash r0
+sleep 1
+pop r0
+sb VEND RequestHash r0
+sleep 1
+pop r0
+sb VEND RequestHash r0
+sleep 1
+pop r0
+sb VEND RequestHash r0
+j start

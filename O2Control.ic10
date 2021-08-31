@@ -1,0 +1,58 @@
+# O2 Control
+
+define FILTRATION -348054045
+
+define MAXPRESSURE 20000
+define O2TARGET 0.25
+define MINPRESSURE 60
+
+alias dPipeAnalyzer d0
+alias dInVent1 d1
+alias dInVent2 d2
+alias dAtmosSensor d3
+
+alias vPressure r15
+alias vActive r14
+alias vOxygenRatio r13
+alias vAtmosPressure r12
+
+s db Setting 0
+start:
+#loop counter
+l r0 db Setting
+add r0 r0 1
+s db Setting r0
+
+s dInVent1 PressureInternal MAXPRESSURE
+s dInVent1 Mode 1
+s dInVent2 PressureInternal MAXPRESSURE
+s dInVent2 Mode 1
+
+#check o2 ratio in air
+l vOxygenRatio dAtmosSensor RatioOxygen
+sge vActive vOxygenRatio O2TARGET
+beqz vActive off
+
+#check AtmosPressure
+l vAtmosPressure dAtmosSensor Pressure 
+sge vActive vAtmosPressure MINPRESSURE
+beqz vActive off
+
+#check Pipe Pressure
+l vPressure dPipeAnalyzer Pressure
+sle vActive vPressure MAXPRESSURE
+beqz vActive off
+
+s dInVent1 On 1
+s dInVent2 On 1
+sb FILTRATION On 1
+
+yield
+j start
+
+off:
+s dInVent1 On 0
+s dInVent2 On 0
+sb FILTRATION On 0
+yield
+j start

@@ -1,0 +1,14 @@
+#Water Generation
+alias H2Combustor d0
+alias H2Analyzer d1
+
+define MAXPRESSURE 20000
+
+main:
+l r0 H2Analyzer Pressure
+slt r0 r0 MAXPRESSURE
+
+s H2Combustor On r0
+
+yield
+j main

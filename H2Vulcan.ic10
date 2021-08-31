@@ -1,0 +1,46 @@
+# H2 Vulcan Control
+
+define FILTRATION -348054045
+
+define MAXPRESSURE 20000
+define MAXATMOSTEMPERATURE 500
+define TARGETTEMPERATURE 300
+
+alias dPipeAnalyzer d0
+alias dInVent d1
+alias dAtmosSensor d2
+
+alias vPressure r15
+alias vVentActive r14
+alias vAtmosTemperature r13
+alias vFilterActive r12
+alias vPipeTemperature r11
+
+s db Setting 0
+start:
+#loop counter
+l r0 db Setting
+add r0 r0 1
+s db Setting r0
+
+s dInVent PressureInternal MAXPRESSURE
+s dInVent Mode 1
+
+#check h2 temperature in atmos
+l vAtmosTemperature dAtmosSensor Temperature
+sle vVentActive vAtmosTemperature MAXATMOSTEMPERATURE
+s dInVent On vVentActive
+
+#check Pipe Pressure
+l vPressure dPipeAnalyzer Pressure 
+sle vFilterActive vPressure MAXPRESSURE
+
+#check Pipe Temperature
+l vPipeTemperature dPipeAnalyzer Temperature
+sle r0 vPipeTemperature TARGETTEMPERATURE
+
+and vFilterActive vFilterActive r0
+sb FILTRATION On vFilterActive
+
+yield
+j start

@@ -1,0 +1,17 @@
+define DIAL 554524804
+start:
+lb sp DIAL Setting Average
+mul sp sp 9
+add sp sp 9
+pop r0
+s d3 Setting r0
+sleep 1
+pop r0
+s d2 Setting r0
+sleep 1
+pop r0
+s d1 Setting r0
+sleep 1
+pop r0
+s d0 Setting r0
+j start

@@ -1,0 +1,21 @@
+define FILTRATION -348054045
+define VENT -1129453144
+
+define MAXPRESSURE 20000
+
+alias dPipeAnalyzer d0
+
+alias vPressure r15
+alias vActive r14
+
+s db Setting 0
+start:
+sb VENT PressureInternal MAXPRESSURE
+sb VENT Mode 1
+
+l vPressure dPipeAnalyzer Pressure
+sle vActive vPressure MAXPRESSURE
+sb FILTRATION On vActive
+sb VENT On vActive
+yield
+j start

@@ -1,0 +1,128 @@
+alias dDoorIn d0
+alias dDoorOut d1
+alias dVentIn d2
+alias dVentOut d3
+alias dOverride1 d4
+alias dOverride2 d5
+define GASSENSOR -1252983604
+define MOTIONSENSOR -1713470563
+alias openDoor r15
+alias activated r14
+alias pressure r13
+alias overrideActive r12
+alias temperature r11
+define DVENTIN 2
+define DVENTOUT 3
+define CRITTEMP 323 #50 degree
+
+s dDoorIn Lock 0
+s dDoorOut Lock 0
+s dVentIn Setting 100
+s dVentIn Lock 1
+s dVentIn Mode 1
+s dVentIn PressureExternal 0
+s dVentIn PressureInternal 10000000
+s dVentIn On 0
+s dVentOut Setting 100
+s dVentOut Lock 1
+s dVentOut Mode 1
+s dVentOut PressureExternal 0
+s dVentOut PressureInternal 10000000
+s dVentOut On 0
+l r3 dDoorIn Open
+s dDoorIn Setting r3
+l r3 dDoorOut Open
+s dDoorOut Setting r3
+alias noPerson r4
+move noPerson 1
+
+loop:
+yield
+bdns dDoorIn error
+bdns dDoorOut error
+bdns dVentIn error
+bdns dVentOut error
+lb pressure GASSENSOR Pressure 1 #Batch sum
+lb temperature GASSENSOR Temperature 0 #Batch Average
+jal checkOverride
+bnez overrideActive override
+s dDoorIn Mode 1
+s dDoorOut Mode 1
+jal resetPerson
+l activated dDoorOut Setting
+l r3 dDoorOut Open
+sne activated activated r3
+bnez activated run
+l r3 dDoorIn Open
+l activated dDoorIn Setting
+sne activated activated r3
+bnez activated run
+lb activated MOTIONSENSOR Activate 3# Batch Max
+add r7 noPerson activated
+beq r7 2 run
+j loop
+
+resetPerson:
+lb activated MOTIONSENSOR Activate 3# Batch Max
+bnez activated ra
+move noPerson 1
+j ra
+
+run:
+move noPerson 0
+l openDoor dDoorOut Open
+s dDoorOut Lock 1
+s dDoorIn Lock 1
+beqz openDoor runToOut
+j runToIn
+
+runToIn:
+s dDoorOut Open 0
+s dDoorOut Setting 0
+move r8 DVENTOUT
+jal activateVent
+s dDoorIn Open 1
+s dDoorIn Setting 1
+j runFinish
+
+runToOut:
+s dDoorIn Open 0
+s dDoorIn Setting 0
+move r8 DVENTIN
+jal activateVent
+s dDoorOut Open 1
+s dDoorOut Setting 1
+j runFinish
+
+activateVent:
+s dr8 On 1
+innerLoop:
+#yield
+lb pressure GASSENSOR Pressure 1 # Batch Sum
+bgt pressure 0 innerLoop
+#yield
+s dr8 On 0
+j ra
+
+runFinish:
+s dDoorOut Lock 0
+s dDoorIn Lock 0
+j loop
+
+override:
+bgt temperature CRITTEMP runToIn
+s dDoorIn Lock 0
+s dDoorOut Lock 0
+s dDoorIn Mode 0
+s dDoorOut Mode 0
+j loop
+checkOverride:
+move overrideActive 0
+bdns dOverride1 ra
+bdns dOverride2 ra
+l overrideActive dOverride1 Setting
+l r0 dOverride2 Setting
+and overrideActive overrideActive r0
+j ra
+error:
+asd

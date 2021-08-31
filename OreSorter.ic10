@@ -1,0 +1,35 @@
+#Furnace Input Handler
+# Includes a sorter that discards items not fitted for the furnace to the right slot
+# and a Main Input Switch for the Furnace
+
+alias Sorter d0
+alias MainInput d1
+alias CoolantPump d2
+alias HeatPump d3
+
+define ORECLASS 10
+define INGOTClASS 19
+
+alias itemClass r0
+
+
+Start:
+l r0 MainInput Setting
+s CoolantPump On r0
+s HeatPump On r0
+
+s Sorter Mode 2 # Logic mode
+ls itemClass Sorter 0 Class
+ls r1 Sorter 0 Occupied
+s db Setting r1
+
+
+beq itemClass ORECLASS True
+beq itemClass INGOTClASS True
+
+s d0 Output 1 #Right output
+j Start
+
+True:
+s d0 Output 0 #Left output
+j Start

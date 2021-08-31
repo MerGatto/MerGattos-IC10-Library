@@ -1,0 +1,25 @@
+#Cooling Control
+
+alias coldtank d0
+alias intakepump d1
+alias valve d2
+
+define MAXPRESSURE 20000
+define COLDTEMP 300
+
+start:
+#check for cold topup
+l r0 coldtank Pressure
+slt r0 r0 MAXPRESSURE
+l r1 coldtank Temperature
+slt r1 r1 COLDTEMP
+and r0 r0 r1
+s intakepump On r0
+s intakepump Setting 100
+#check cold temp
+l r0 coldtank Temperature
+sgt r0 r0 COLDTEMP
+s valve On r0
+
+yield
+j start

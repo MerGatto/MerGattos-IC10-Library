@@ -1,0 +1,46 @@
+#Temperature Control
+alias targetPipe d0
+alias coolValve d1
+alias heatValve d2
+alias intakePump d3
+alias targetTempMemory d4
+
+define MAXPRESSURE 20000
+define DEFAULTTEMP 300
+
+alias vTargetTemp r15
+alias vPressure r14
+
+start:
+#check Pressure
+bdseal intakePump pressureCheck
+
+#check Temp Setting
+move vTargetTemp DEFAULTTEMP
+bdseal targetTempMemory memoryCheck
+s db Setting vTargetTemp
+
+#check cold temp
+l r0 targetPipe Temperature
+sgt r0 r0 vTargetTemp
+s coolValve On r0
+
+#check hot temp
+l r0 targetPipe Temperature
+slt r0 r0 vTargetTemp
+s heatValve On r0
+
+yield
+j start
+
+pressureCheck:
+#PipePressure
+l vPressure targetPipe Pressure
+slt r0 vPressure MAXPRESSURE
+s intakePump On r0
+j ra
+
+memoryCheck:
+l vTargetTemp targetTempMemory Setting
+add vTargetTemp vTargetTemp 273
+j ra

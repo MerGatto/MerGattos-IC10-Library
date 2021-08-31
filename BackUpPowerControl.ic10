@@ -1,0 +1,73 @@
+# Constants
+define cHighCharge 50
+define cLowCharge 10
+
+define BATTERYLARGE -1388288459
+define BATTERY -400115994
+
+# Device aliases
+alias dBackupGenerator d0
+alias dDisplay d1
+
+# variables
+alias vActivated r15
+alias vChargePerc r14
+alias vBatteryChargeAbs r13
+alias vBatteryMax r12
+
+# Set constants
+
+main:
+lb r0 BATTERYLARGE Charge 1
+lb r1 BATTERY Charge 1
+add vBatteryChargeAbs r0 r1
+
+lb r0 BATTERYLARGE Maximum 1
+lb r1 BATTERY Maximum 1
+add vBatteryMax r0 r1
+
+div vChargePerc vBatteryChargeAbs vBatteryMax
+mul vChargePerc vChargePerc 100
+trunc vChargePerc vChargePerc
+s db Setting vChargePerc
+bdseal dDisplay display
+
+# activate chec
+bge vChargePerc cHighCharge deactivate
+ble vChargePerc cLowCharge activate
+
+yield
+j main
+
+activate:
+s dBackupGenerator On 1
+yield
+j main
+
+deactivate:
+s dBackupGenerator On 0
+yield
+j main
+
+display:
+div r0 vChargePerc 100
+s dDisplay Setting r0
+s dDisplay Mode 1
+
+bgt vChargePerc 99 maxCharge
+bgt vChargePerc 80 highcharge
+bgt vChargePerc 40 mediumcharge
+s dDisplay Color 4
+j ra
+
+mediumcharge:
+s dDisplay Color 5
+j ra
+
+highcharge:
+s dDisplay Color 2
+j ra
+
+maxCharge:
+s dDisplay Color 0
+j ra
