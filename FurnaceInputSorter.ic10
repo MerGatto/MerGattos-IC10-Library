@@ -9,8 +9,10 @@ alias HeatPump d3
 
 define ORECLASS 10
 define INGOTClASS 19
+define BIOMASS -831480639
 
 alias itemClass r0
+alias itemHash r1
 
 
 Start:
@@ -20,12 +22,15 @@ s HeatPump On r0
 
 s Sorter Mode 2 # Logic mode
 ls itemClass Sorter 0 Class
+ls itemHash Sorter 0 OccupantHash
 ls r1 Sorter 0 Occupied
 s db Setting r1
 
 
 beq itemClass ORECLASS True
 beq itemClass INGOTClASS True
+beq itemHash BIOMASS True
+
 
 s d0 Output 1 #Right output
 j Start

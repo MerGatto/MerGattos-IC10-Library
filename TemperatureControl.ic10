@@ -9,11 +9,14 @@ alias heatValve d2
 alias intakePump d3
 alias targetTempMemory d4
 
-define MAXPRESSURE 20000
+define MAXPRESSURE 10000
 define DEFAULTTEMP 300
+define TEMPTOLERANCE 2
 
 alias vTargetTemp r15
 alias vPressure r14
+alias vLowTemp r13
+alias vHighTemp r12
 
 start:
 #check Pressure
@@ -23,15 +26,17 @@ bdseal intakePump pressureCheck
 move vTargetTemp DEFAULTTEMP
 bdseal targetTempMemory memoryCheck
 s db Setting vTargetTemp
+add vHighTemp vTargetTemp TEMPTOLERANCE
+sub vLowTemp vTargetTemp TEMPTOLERANCE
 
 #check cold temp
 l r0 targetPipe Temperature
-sgt r0 r0 vTargetTemp
+sgt r0 r0 vHighTemp
 s coolValve On r0
 
 #check hot temp
 l r0 targetPipe Temperature
-slt r0 r0 vTargetTemp
+slt r0 r0 vLowTemp
 s heatValve On r0
 
 yield

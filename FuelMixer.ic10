@@ -24,6 +24,7 @@ add r1 tempO2 r2
 div r0 r2 r1
 mul r0 r0 100
 s mixer Setting r0
+sleep
 
 bgt tempH2 315 off
 bgt tempO2 315 off
