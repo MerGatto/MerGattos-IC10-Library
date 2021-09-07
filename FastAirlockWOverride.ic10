@@ -89,7 +89,7 @@ s dDoorIn Open 0
 s dDoorIn Setting 0
 move r8 DVENTIN
 jal activateVent
-sleep 1
+sleep 2
 s dDoorOut Open 1
 s dDoorOut Setting 1
 j runFinish

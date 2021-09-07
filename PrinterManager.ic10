@@ -1,0 +1,59 @@
+# Printer Manager
+
+alias Printer d0
+alias Display d1
+alias Stacker d2
+alias DialE0 d3
+alias DialE1 d4
+alias DialE2 d5
+
+alias setting r12
+alias count r13
+
+Reset:
+s Printer Activate 0
+s Display Color 2
+# Setup
+s DialE0 Mode 9
+s DialE1 Mode 9
+s DialE2 Mode 9
+
+s Stacker Activate 1
+sleep 2
+s Stacker On 0
+
+main:
+jal CalcSetting
+s Display Setting setting
+
+l r0 Printer Activate
+beq r0 1 StartPrinting
+j main
+
+CalcSetting:
+l r0 DialE0 Setting
+l r1 DialE1 Setting
+l r2 DialE2 Setting
+mul r2 r2 100
+mul r1 r1 10
+add setting r2 r1
+add setting setting r0
+j ra
+
+StartPrinting:
+s Display Color 5
+move count setting
+s Printer ClearMemory 1
+s Stacker On 1
+s Stacker Setting setting
+
+Printing:
+l r0 Printer Activate
+beqz r0 Reset
+l r0 Printer ExportCount
+sub count setting r0
+s db Setting count
+s Display Setting count
+beqz count Reset
+j Printing
+
