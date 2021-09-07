@@ -5,75 +5,55 @@ alias Dish3 d3
 alias Dish4 d4
 alias Dish5 d5
 
-alias TrackSS r1
-alias SigH r2
-alias SigV r3
-alias SigID r4
-alias OldID r5
-alias Track r6
-alias Rota r7
-alias DTrackH r8
-alias CurV r9
+alias sigH r15
+alias sigV r14
+alias signalID r13
+alias oldsignalID r12
+alias track r11
+alias hAngle r10
+alias vAngle r9
+alias step r8
 
 Reset:
-move Track 1
-move CurV 30
-move OldID 100
+move track 1
+move oldsignalID 0
+move hAngle 0
+move vAngle 90
+move step 4
 
 Start: #start
-s TrackingDish Vertical CurV
-s TrackingDish Horizontal 179
-RotaUp:
-l TrackSS TrackingDish SignalStrength
-bgt TrackSS .95 SetDish
-RotaUpA:
-l DTrackH TrackingDish Horizontal
-bgt DTrackH 178 AdjustV
-blt DTrackH 1 AdjustVD
-yield
-j RotaUp
-AdjustVD:
-add CurV CurV 11
-bgt CurV 90 Sub92
-SetV2:
-s TrackingDish Vertical CurV
-sleep 3
-s TrackingDish Horizontal 179
-yield
-j RotaUp
-Sub92:
-add CurV CurV -89
-j SetV2
-AdjustV:
-add CurV CurV 11
-bgt CurV 90 sub90
-SetV:
-s TrackingDish Vertical CurV
-sleep 3
-s TrackingDish Horizontal 0
-yield
-j RotaUp
-sub90:
-add CurV CurV -89
-j SetV
+s TrackingDish Horizontal hAngle
+s TrackingDish Vertical vAngle
+sleep 0.5
+l signalID TrackingDish SignalID
+l r0 TrackingDish SignalStrength
+bgeal r0 0.95 SetDish
+add hAngle hAngle step
+bge hAngle 360 ChangeAngle
+j Start
+
+ChangeAngle:
+move hAngle 0
+sub vAngle vAngle 5
+ble vAngle 0 Reset
+j Start
 
 SetDish:
-l SigH TrackingDish Horizontal
-l SigV TrackingDish Vertical
-l SigID TrackingDish SignalID
-beq SigID OldID RotaUpA
-move r0 Track
-s dr0 Horizontal SigH
-s dr0 Vertical SigV
-move OldID SigID
+l sigH TrackingDish Horizontal
+l sigV TrackingDish Vertical
+l signalID TrackingDish SignalID
+beq signalID oldsignalID ra
+move r0 track
+s dr0 Horizontal sigH
+s dr0 Vertical sigV
+move oldsignalID signalID
 IncTrack:
-add Track Track 1
-beqal Track 6 ResetTrack
-move r0 Track
+add track track 1
+# Reset Track if we reached last dish
+brne track 6 2
+move track 1
+
+move r0 track
 bdns dr0 IncTrack
 yield
-j RotaUp
-
-ResetTrack:
-move Track 1
 j ra
