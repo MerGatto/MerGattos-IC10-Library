@@ -1,0 +1,47 @@
+# Simple Helmet Control
+alias helmet d0
+alias jetpack d1
+
+define MINPRESSURE 70
+define MAXPRESSURE 200
+define MINTEMP 318 # 45c
+define MAXTEMP 283 # 10c
+
+alias pressure r15
+alias temp r14
+
+main:
+yield
+# load external pressure
+l pressure db PressureExternal
+# load external temperature
+l temp db TemperatureExternal
+
+# pressure checks
+bgt pressure MAXPRESSURE closeHelmet
+ble pressure MINPRESSURE closeHelmet
+
+# temperature checks
+bge temp MAXTEMP closeHelmet
+ble temp MINTEMP closeHelmet
+
+# Open helmet unless the last filter slot is occupied
+ls r0 db 7 Occupied
+beqz r0 openHelmet
+
+j main
+
+closeHelmet:
+s helmet Open 0
+s db AirRelease 1
+s db Filtration 1
+s db On 1  # AC
+j main
+
+openHelmet:
+s helmet Open 1
+s db AirRelease 0
+s db Filtration 0
+s db On 0  # AC
+
+j main

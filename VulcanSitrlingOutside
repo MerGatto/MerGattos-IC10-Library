@@ -1,0 +1,20 @@
+# VULCAN Stirling Engine Control
+# Turns off at night
+define ENGINE -260316435
+
+define MAXTEMP 470 # 200C
+
+alias dAtmosSensor d0
+alias vAtmosTemp r13
+
+start:
+l vAtmosTemp dAtmosSensor Temperature
+bgt vAtmosTemp MAXTEMP Idling
+sb ENGINE On 1
+yield
+j start
+
+Idling:
+sb ENGINE On 0
+yield
+j start

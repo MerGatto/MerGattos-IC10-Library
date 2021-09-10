@@ -1,0 +1,45 @@
+# Stacker Controlled Printer
+# Uses the setting of the stacker to control the amount to be produces by the connected printer
+# Optionaly display a countdown and the current setting on a connected display
+
+alias Printer d0
+alias Stacker d1
+alias Display d2
+
+alias setting r12
+alias count r13
+
+Reset:
+s Printer Activate 0
+brdns Display 2
+s Display Color 2
+
+Main:
+brdns Display 2
+s Display On 1
+s Printer On 1
+
+l setting Stacker Setting
+brdns Display 2
+s Display Setting setting
+
+l r0 Printer Activate
+beq r0 1 StartPrinting
+j Main
+
+StartPrinting:
+brdns Display 2
+s Display Color 5
+move count setting
+s Printer ClearMemory 1
+
+Printing:
+l r0 Printer Activate
+beqz r0 Reset
+l r0 Printer ExportCount
+sub count setting r0
+s db Setting count
+brdns Display 2
+s Display Setting count
+beqz count Reset
+j Printing

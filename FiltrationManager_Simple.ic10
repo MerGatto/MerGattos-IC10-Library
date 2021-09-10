@@ -1,0 +1,24 @@
+# controls all vents and filtration units to fill a pipe until 20MP
+define FILTRATION -348054045
+
+define PRESSURETHRESHOLD 1000
+
+alias dWasteAnalyzer d0
+
+alias vPressure r15
+
+main:
+yield
+s dWasteAnalyzer On 1
+l vPressure dWasteAnalyzer Pressure
+bgt vPressure PRESSURETHRESHOLD turnOn
+beqz vPressure turnOff
+j main
+
+turnOn:
+sb FILTRATION On 1
+j main
+
+turnOff:
+sb FILTRATION On 0
+j main

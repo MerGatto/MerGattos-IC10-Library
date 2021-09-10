@@ -1,5 +1,5 @@
 #Furnace Input Handler
-# Includes a sorter that discards items not fitted for the furnace to the right slot
+# Includes a sorter that discards items not fitted for the furnace to the left slot
 # and a Main Input Switch for the Furnace
 
 alias Sorter d0
@@ -32,9 +32,9 @@ beq itemClass INGOTClASS True
 beq itemHash BIOMASS True
 
 
-s d0 Output 1 #Right output
+s d0 Output 0 #Left output
 j Start
 
 True:
-s d0 Output 0 #Left output
+s d0 Output 1 #Right output
 j Start

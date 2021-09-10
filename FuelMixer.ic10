@@ -8,26 +8,29 @@ define MAXPRESSURE 20000
 
 alias tempO2 r15
 alias tempH2 r14
+alias pressureO2 r13
+alias pressureH2 r12
+alias pressureFuel r11
 
 main:
 l tempH2 paH2 Temperature
 l tempO2 paO2 Temperature
-l r2 paH2 TotalMoles
-l r3 paO2 TotalMoles
-l r4 paFuel Pressure
-beqz r2 off
-beqz r3 off
-bge r4 MAXPRESSURE off
+l pressureH2 paH2 Pressure
+l pressureO2 paO2 Pressure
+l pressureFuel paFuel Pressure
+bge pressureFuel MAXPRESSURE off
 
 mul r2 tempH2 RATIO
 add r1 tempO2 r2
 div r0 r2 r1
 mul r0 r0 100
 s mixer Setting r0
-sleep
+sleep 1
 
 bgt tempH2 315 off
 bgt tempO2 315 off
+blt pressureO2 100 off
+blt pressureH2 100 off
 s mixer On 1
 yield
 j main

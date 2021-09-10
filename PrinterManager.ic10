@@ -18,11 +18,15 @@ s DialE0 Mode 9
 s DialE1 Mode 9
 s DialE2 Mode 9
 
-s Stacker Activate 1
 sleep 2
+s Stacker Activate 1
+sleep 1
 s Stacker On 0
 
 main:
+s Display On 1
+s Printer On 1
+
 jal CalcSetting
 s Display Setting setting
 
@@ -44,8 +48,8 @@ StartPrinting:
 s Display Color 5
 move count setting
 s Printer ClearMemory 1
-s Stacker On 1
 s Stacker Setting setting
+s Stacker On 1
 
 Printing:
 l r0 Printer Activate

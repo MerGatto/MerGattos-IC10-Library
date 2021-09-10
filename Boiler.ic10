@@ -27,6 +27,7 @@ and r0 r0 r1
 s boiler Activate r0
 
 #check for hot top up
+bdns wastetank fuelextraction
 l r0 wastetank Temperature
 sge r0 r0 HOTTEMP
 l r1 hottank Pressure
@@ -34,6 +35,7 @@ slt r1 r1 MAXPRESSURE
 and r0 r0 r1
 s hottopup On r0
 
+fuelextraction:
 # turn on extractor
 l r0 boiler Temperature
 sge r0 r0 IGNITETMP

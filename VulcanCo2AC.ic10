@@ -1,0 +1,36 @@
+# VULCAN CO2 AC
+define FILTRATION -348054045
+define VENT -1129453144
+define AC -2087593337
+
+define MAXPRESSURE 20000
+define MAXTEMP 450
+
+alias dPipeAnalyzer d0
+alias dAtmosSensor d1
+
+alias vPressure r15
+alias vActive r14
+alias vAtmosTemp r13
+
+s db Setting 0
+start:
+sb VENT PressureInternal MAXPRESSURE
+sb VENT Mode 1
+
+l vAtmosTemp dAtmosSensor Temperature
+bgt vAtmosTemp MAXTEMP Idling
+
+
+l vPressure dPipeAnalyzer Pressure
+sle vActive vPressure MAXPRESSURE
+sb FILTRATION On vActive
+sb VENT On vActive
+yield
+j start
+
+Idling:
+sb FILTRATION On 0
+sb VENT On 0
+sb AC On 0
+j start

@@ -1,47 +1,81 @@
-alias TrackingDish d0
-alias Dish1 d1
-alias Dish2 d2
-alias Dish3 d3
-alias Dish4 d4
-alias Dish5 d5
+alias TrackingDish1 d0
+alias TrackingDish2 d1
+alias TradingDish1 d2
+alias TradingDish2 d3
+alias TradingDish3 d4
+alias TradingDish4 d5
 
 alias sigH r15
 alias sigV r14
 alias signalID r13
 alias oldsignalID r12
 alias track r11
-alias hAngle r10
-alias vAngle r9
-alias step r8
+alias hAngle1 r10
+alias vAngle1 r9
+alias hAngle2 r8
+alias vAngle2 r7
+alias step r6
 
 Reset:
-move track 1
+move track 2
 move oldsignalID 0
-move hAngle 0
-move vAngle 90
+move hAngle1 0
+move vAngle1 90
+move hAngle2 180
+move vAngle2 45
 move step 4
+s TrackingDish1 Horizontal hAngle1
+s TrackingDish1 Vertical vAngle1
+s TrackingDish2 Horizontal hAngle2
+s TrackingDish2 Vertical vAngle2
+sleep 5
 
 Start: #start
-s TrackingDish Horizontal hAngle
-s TrackingDish Vertical vAngle
+s TrackingDish1 Horizontal hAngle1
+s TrackingDish1 Vertical vAngle1
+s TrackingDish2 Horizontal hAngle2
+s TrackingDish2 Vertical vAngle2
 sleep 0.5
-l signalID TrackingDish SignalID
-l r0 TrackingDish SignalStrength
-bgeal r0 0.95 SetDish
-add hAngle hAngle step
-bge hAngle 360 ChangeAngle
+l signalID TrackingDish1 SignalID
+l r0 TrackingDish1 SignalStrength
+bgeal r0 0.95 SetDish1
+l signalID TrackingDish2 SignalID
+l r0 TrackingDish2 SignalStrength
+bgeal r0 0.95 SetDish2
+
+add hAngle1 hAngle1 step
+bgeal hAngle1 360 ChangeAngle1
+add hAngle2 hAngle2 step
+bgeal hAngle2 360 ChangeAngle2
 j Start
 
-ChangeAngle:
-move hAngle 0
-sub vAngle vAngle 5
-ble vAngle 0 Reset
-j Start
+ChangeAngle1:
+move hAngle1 0
+sub vAngle1 vAngle1 5
+brle vAngle1 0 2
+j ra
+move vAngle1 90
+j ra
+
+ChangeAngle2:
+move hAngle2 0
+sub vAngle2 vAngle2 5
+brle vAngle2 0 2
+j ra
+move vAngle2 90
+j ra
+
+SetDish1:
+move r0 0
+j SetDish
+SetDish2:
+move r0 1
+j SetDish
 
 SetDish:
-l sigH TrackingDish Horizontal
-l sigV TrackingDish Vertical
-l signalID TrackingDish SignalID
+l sigH dr0 Horizontal
+l sigV dr0 Vertical
+l signalID dr0 SignalID
 beq signalID oldsignalID ra
 move r0 track
 s dr0 Horizontal sigH
@@ -51,7 +85,7 @@ IncTrack:
 add track track 1
 # Reset Track if we reached last dish
 brne track 6 2
-move track 1
+move track 2
 
 move r0 track
 bdns dr0 IncTrack
