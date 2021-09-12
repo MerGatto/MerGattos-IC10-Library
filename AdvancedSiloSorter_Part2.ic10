@@ -23,6 +23,8 @@ define URANIUMORE -1516581844
 define VOLATILESICE 1253102035
 define OXITEICE -1805394113
 define WATERICE 1217489948
+define STACKER -2020231820
+define STACKER_REVERSE 1585641623
 
 alias itemClass r12
 alias itemHash r11
@@ -41,6 +43,8 @@ bdseal d5 HandleSorter5
 j Main
 
 Setup:
+sb STACKER On 1
+sb STACKER Setting 500
 move r0 0
 SetupLoop:
 brdns dr0 3
