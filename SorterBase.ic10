@@ -1,0 +1,123 @@
+#Base Programming for managing up to 6 sorters
+
+alias Sorter0 d0
+alias Sorter1 d1
+alias Sorter2 d2
+alias Sorter3 d3
+alias Sorter4 d4
+alias Sorter5 d5
+
+define ORECLASS 10
+define INGOTClASS 19
+define BIOMASS -831480639
+define IRONORE 1758427767
+define COAL 1724793494
+define SILICONORE 1103972403
+define LEADORE -190236170
+define NICKELORE -1406385572
+define GOLDORE -1348105509
+define COPPERORE -707307845
+define SILVERORE -916518678
+define COBALTORE -983091249
+define URANIUMORE -1516581844
+define VOLATILESICE 1253102035
+define OXITEICE -1805394113
+define WATERICE 1217489948
+
+alias itemClass r12
+alias itemHash r11
+alias occupied r10
+
+Main:
+jal Setup
+
+bdseal d0 HandleSorter0
+bdseal d1 HandleSorter1
+bdseal d2 HandleSorter2
+bdseal d3 HandleSorter3
+bdseal d4 HandleSorter4
+bdseal d5 HandleSorter5
+j Main
+
+Setup:
+move r0 0
+SetupLoop:
+brdns dr0 3
+s dr0 Mode 2 # Logic mode
+s dr0 On 1
+s dr0 Output -1
+add r0 r0 1
+beq r0 6 ra
+j SetupLoop
+
+HandleSorter0: # Sort 0
+move r0 0
+push ra
+jal LoadOccupant
+pop ra
+beqz occupied ra
+# beq itemClass CLASS SortMatch
+# beq itemHash HASH SortMatch
+j SortNoMatch
+
+HandleSorter1: # Sort 1
+move r0 1
+push ra
+jal LoadOccupant
+pop ra
+beqz occupied ra
+# beq itemClass CLASS SortMatch
+# beq itemHash HASH SortMatch
+j SortNoMatch
+
+HandleSorter2: # Sort 2
+move r0 2
+push ra
+jal LoadOccupant
+pop ra
+beqz occupied ra
+# beq itemClass CLASS SortMatch
+# beq itemHash HASH SortMatch
+j SortNoMatch
+
+HandleSorter3: # Sort 3
+move r0 3
+push ra
+jal LoadOccupant
+pop ra
+beqz occupied ra
+# beq itemClass CLASS SortMatch
+# beq itemHash HASH SortMatch
+j SortNoMatch
+
+HandleSorter4: # Sort 4
+move r0 4
+push ra
+jal LoadOccupant
+pop ra
+beqz occupied ra
+# beq itemClass CLASS SortMatch
+# beq itemHash HASH SortMatch
+j SortNoMatch
+
+HandleSorter5: # Sort 5
+move r0 5
+push ra
+jal LoadOccupant
+pop ra
+beqz occupied ra
+# beq itemClass CLASS SortMatch
+# beq itemHash HASH SortMatch
+j SortNoMatch
+
+LoadOccupant:
+ls itemClass dr0 0 Class
+ls itemHash dr0 0 OccupantHash
+ls occupied dr0 0 Occupied
+j ra
+SortMatch:
+s dr0 Output 1 #Right output
+j ra
+SortNoMatch:
+s dr0 Output 0 #Left output
+j ra

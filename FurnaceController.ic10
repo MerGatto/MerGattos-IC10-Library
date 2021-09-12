@@ -2,13 +2,15 @@
 #https://steamcommunity.com/sharedfiles/filedetails/?id=2520700872
 #this version has no automatic ejection of processed items
 alias furnace d0
-alias button d1
-alias hotpump d2
-alias coldpump d3
-alias hotsensor d4
-alias coldsensor d5
+alias hotpump d1
+alias coldpump d2
+alias hotsensor d3
+alias coldsensor d4
+
 define DIAL 554524804
 define LED 1944485013
+
+alias targettemp r4
 alias hotsetting r5
 alias coldsetting r6
 alias inputspeed r7
@@ -20,9 +22,11 @@ alias maxtemp r12
 alias minpress r13
 alias maxpress r14
 alias light r15
+
 start:
 yield
 s furnace SettingOutput 0
+s furnace SettingInput 100
 s hotpump Setting 0
 s coldpump Setting 0
 sb LED Color light
@@ -37,9 +41,6 @@ pop maxtemp
 pop mintemp
 pop ingothash
 s db Setting ingothash
-#check button
-l r0 button Setting
-bnez r0 sendmaterials
 # Check pressure and temp in alloy zone
 l r0 furnace Pressure
 bgt r0 maxpress makeadjustment
@@ -59,7 +60,11 @@ max r2 r2 0.1
 div inputtemp r0 r1
 mul inputtemp inputtemp r2
 mul inputtemp inputtemp minpress #target energy
-div inputmoles inputtemp mintemp #target moles
+l targettemp hotsensor Temperature
+min maxtemp maxtemp targettemp
+add targettemp targettemp mintemp
+div mintemp targettemp 2
+div inputmoles inputtemp targettemp #target moles
 sub inputmoles inputmoles r0 #moles needed
 mul r0 r0 r2 #current energy
 sub inputtemp inputtemp r0 #energy needed
@@ -103,20 +108,4 @@ s hotpump Setting hotsetting
 j start
 reducepressure:
 s furnace SettingOutput 50
-j start
-sendmaterials:
-lb sp DIAL Setting Average
-mul sp sp 9
-add sp sp 9
-pop r0
-sb VEND RequestHash r0
-sleep 1
-pop r0
-sb VEND RequestHash r0
-sleep 1
-pop r0
-sb VEND RequestHash r0
-sleep 1
-pop r0
-sb VEND RequestHash r0
 j start

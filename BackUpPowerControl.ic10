@@ -12,6 +12,7 @@ define BATTERY -400115994
 # Device aliases
 alias dBackupGenerator d0
 alias dDisplay d1
+alias dMem d2
 
 # variables
 alias vActivated r15
@@ -35,7 +36,9 @@ mul vChargePerc vChargePerc 100
 trunc vChargePerc vChargePerc
 s db Setting vChargePerc
 bdseal dDisplay display
+bdseal dMem writeMem
 
+bdns dBackupGenerator main
 # activate chec
 bge vChargePerc cHighCharge deactivate
 ble vChargePerc cLowCharge activate
@@ -62,6 +65,10 @@ bgt vChargePerc 99 maxCharge
 bgt vChargePerc 80 highcharge
 bgt vChargePerc 25 mediumcharge
 s dDisplay Color 4
+j ra
+
+writeMem:
+s dMem Setting vChargePerc
 j ra
 
 mediumcharge:

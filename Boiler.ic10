@@ -3,11 +3,11 @@
 # this version requires ready to use fuel
 
 alias hottank d0
-alias hottopup d1
-alias boiler d2
+alias boiler d1
+alias fuelpump d2
 alias extractorpump d3
-alias fuelpump d4
-alias wastetank d5
+alias wastetank d4
+alias hottopup d5
 
 define MAXPRESSURE 20000
 define HOTTEMP 2000
