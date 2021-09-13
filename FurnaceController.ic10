@@ -61,7 +61,7 @@ div inputtemp r0 r1
 mul inputtemp inputtemp r2
 mul inputtemp inputtemp minpress #target energy
 l targettemp hotsensor Temperature
-min maxtemp maxtemp targettemp
+min targettemp maxtemp targettemp
 add targettemp targettemp mintemp
 div mintemp targettemp 2
 div inputmoles inputtemp targettemp #target moles
