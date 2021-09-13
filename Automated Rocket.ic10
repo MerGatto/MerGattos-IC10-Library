@@ -1,7 +1,8 @@
 #Automated Rocket based on Script by Acilec
 alias rocket d0
 alias launchButton d1
-alias display d2
+alias siloDisplay d2
+alias modeDisplay d3
 
 define SILO 906210602
 define OREMINING -2027419821
@@ -25,10 +26,12 @@ Init:
 s rocket Activate 0
 sb SILO Open 0
 lb quantityMax SILO Maximum 1
+# Real maximum is 6 times higher than reported by the Maximum property
+mul quantityMax quantityMax 6
 
 WaitLaunch:
 l mode rocket Mode
-s display Setting mode
+jal UpdateDisplay
 l state launchButton Setting
 beq state 1 Countdown
 j WaitLaunch
@@ -36,7 +39,7 @@ j WaitLaunch
 Countdown:
 move countdown 10 
 DoingCountdown:
-s display Setting countdown
+s modeDisplay Setting countdown
 beqz countdown Launching
 sub countdown countdown 1
 sleep 1
@@ -46,7 +49,7 @@ Launching:
 s rocket Activate 1
 sleep 2
 l mode rocket Mode
-s display Setting mode
+jal UpdateDisplay
 beq mode 4 CheckAvlResources
 j Launching
 
@@ -58,7 +61,7 @@ sb SCRAPMINING Activate 1
 lb quantity SILO Quantity 1
 div quantity quantity quantityMax #calc Silo content (quantity / quantityMax => quantity)
 add mode 8 quantity        #Combine mode 8 with Silo content ex: 8,63 => (Mining, Silo content 63%)
-s display Setting mode
+jal UpdateDisplay
 bge quantity quantityMax Returnhome
 l fuelLeft rocket Fuel
 l returnFuel rocket ReturnFuelCost
@@ -76,7 +79,7 @@ yield
 
 StartTravel:
 s rocket Activate 2
-s display Setting 2
+jal UpdateDisplay
 
 Travel:
 yield
@@ -87,7 +90,7 @@ l returnFuel rocket ReturnFuelCost
 mul returnFuel returnFuel 1.2   #Save some fuel
 bge returnFuel fuelLeft Returnhome
 l mode rocket Mode
-s display Setting mode
+jal UpdateDisplay
 beq mode 3 CheckAvlResources
 beq mode 4 CheckAvlResources
 j Travel
@@ -98,7 +101,7 @@ yield
 
 Returning:
 l mode rocket Mode
-s display Setting mode
+jal UpdateDisplay
 beq mode 0 Unload
 yield
 j Returning
@@ -106,9 +109,16 @@ j Returning
 Unload:
 lb quantity SILO Quantity 1
 beq quantity 0 Init      #if quantity = 0 => Unload completed
-div quantity quantity quantityMax   #calc Silo content (quantity / quantityMax => quantity)
-add mode 9 quantity        #Combine mode 9 with Silo content ex: 9,63 => (Mining, Silo content 63%)
-s display Setting mode
+jal UpdateDisplay
 sb SILO Open 1
 yield
 j Unload
+
+UpdateDisplay:
+l mode rocket Mode
+lb quantity SILO Quantity 1
+div quantity quantity quantityMax #calc Silo content (quantity / quantityMax => quantity)
+s modeDisplay Setting mode
+s siloDisplay Setting quantity
+s siloDisplay Mode 1
+j ra
