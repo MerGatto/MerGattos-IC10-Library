@@ -5,13 +5,15 @@ alias siloDisplay d2
 alias modeDisplay d3
 alias fuelPump d4
 
+define TARGETFUELPRESSURE 10000
+define AUTOSTART 1 # if set to 1 the rocket will automatically launch again when ready
+
 define SILO 906210602
 define OREMINING -2027419821
 define ICEMINING 74521920
 define SCRAPMINING -1446002463
 define GASMINING -1969723301
 
-define TARGETFUELPRESSURE 10000
 
 alias fuelLeft r15
 alias returnFuel r14
@@ -54,6 +56,7 @@ snez r0 siloQantity
 sb SILO Open r0
 sle r0 fuelLeft TARGETFUELPRESSURE
 s fuelPump On r0
+bnez AUTOSTART Countdown
 bnez launchButtonState Countdown
 j ra
 HandleRocketInSpace: #2,3, 4
