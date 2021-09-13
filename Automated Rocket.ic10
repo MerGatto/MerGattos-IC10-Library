@@ -106,13 +106,13 @@ j Main
 
 Returnhome:
 s rocket Activate 5
+sleep 2
 j Main
 
 UpdateDisplay:
-lb siloQantity SILO Quantity 1
-div siloQantity siloQantity quantityMax
+div r0 siloQantity quantityMax
 s modeDisplay Color 2 # green
 s modeDisplay Setting rocketMode
-s siloDisplay Setting siloQantity
+s siloDisplay Setting r0
 s siloDisplay Mode 1
 j ra
