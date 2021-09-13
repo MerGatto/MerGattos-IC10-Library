@@ -12,117 +12,113 @@ define GASMINING -1969723301
 
 alias fuelLeft r15
 alias returnFuel r14
-alias mode r13
-alias state r12
-alias quantity r11
+alias rocketMode r13
+alias launchButtonState r12
+alias siloQantity r11
 alias quantityMax r10
 alias countdown r9
+alias collectableGoods r8
 
-#Display modes
-#0 - Idle, 1 - Launching, 2 - Traveling, 3 - Arrived, 4 - Idle at destination, 5 - Returning to launch, 6 - Returned, 7 - Lost in space, 8.xx - Mining, 9.xx - Unloading
-#.xx Silo Content (%)
-
-Init:
 s rocket Activate 0
-sb SILO Open 0
+sb OREMINING Activate 0
+sb ICEMINING Activate 0
+sb GASMINING Activate 0
+sb SCRAPMINING Activate 0
+sleep 2
+Main:
+yield
+sb OREMINING Activate 0
+sb ICEMINING Activate 0
+sb GASMINING Activate 0
+sb SCRAPMINING Activate 0
+jal LoadData
+jal UpdateDisplay
+beqal rocketMode 0 HandleIdle # Idle on Launch Pad
+beqal rocketMode 2 HandleRocketInSpace # Traveling in space
+beqal rocketMode 3 HandleRocketInSpace # Arriving at location
+beqal rocketMode 4 HandleRocketInSpace # Idle in Space
+beqal rocketMode 7 HandleOutOfFuel # Out of fuel in Space, RIP rocket
+
+j Main
+LoadData:
 lb quantityMax SILO Maximum 1
 # Real maximum is 6 times higher than reported by the Maximum property
 mul quantityMax quantityMax 6
-lb quantity SILO Quantity 1
-bgt quantity 0 Unload
-
-WaitLaunch:
-l mode rocket Mode
-jal UpdateDisplay
-l state launchButton Setting
-beq state 1 Countdown
-j WaitLaunch
-
+lb siloQantity SILO Quantity 1
+l rocketMode rocket Mode
+l collectableGoods rocket CollectableGoods
+l fuelLeft rocket Fuel
+l returnFuel rocket ReturnFuelCost
+l launchButtonState launchButton Setting
+j ra
+HandleIdle: #0
+snez r0 siloQantity
+sb SILO Open r0
+bnez launchButtonState Countdown
+j ra
+HandleRocketInSpace: #2,3, 4
+push ra
+sb SILO Open 0
+bnez launchButtonState Returnhome
+bge siloQantity quantityMax Returnhome
+jal DoFuelCheck
+bnez collectableGoods StartMining
+beqz collectableGoods Travel
+pop ra
+j ra
+HandleOutOfFuel: #7
+hcf
 Countdown:
+sb SILO Open 0
 move countdown 10
 s modeDisplay Color 4 # red
 DoingCountdown:
 s modeDisplay Setting countdown
 beqz countdown Launching
 sub countdown countdown 1
-sleep 1
+yield
+yield
+l launchButtonState launchButton Setting
+beq launchButtonState 1 Main # ABORT LAUNCH
 j DoingCountdown
-
 Launching:
 s rocket Activate 1
 sleep 2
-l mode rocket Mode
-jal UpdateDisplay
-beq mode 4 CheckAvlResources
-j Launching
+j Main
 
+DoFuelCheck:
+mul returnFuel returnFuel 1.2   #Save some fuel
+bge returnFuel fuelLeft Returnhome
+j ra
 StartMining:
+sleep 1
 sb OREMINING Activate 1
 sb ICEMINING Activate 1
 sb GASMINING Activate 1
 sb SCRAPMINING Activate 1
-lb quantity SILO Quantity 1
-div quantity quantity quantityMax #calc Silo content (quantity / quantityMax => quantity)
-add mode 8 quantity        #Combine mode 8 with Silo content ex: 8,63 => (Mining, Silo content 63%)
-jal UpdateDisplay
-bge quantity quantityMax Returnhome
-l fuelLeft rocket Fuel
-l returnFuel rocket ReturnFuelCost
-mul returnFuel returnFuel 1.2   #Save some fuel
-bge returnFuel fuelLeft Returnhome
-l state launchButton Setting
-beq state 1 Returnhome
-
-CheckAvlResources:
+MiningLoop:
 yield
+jal LoadData
+jal DoFuelCheck
+jal UpdateDisplay
+bnez launchButtonState Returnhome
 s rocket Activate 0
-l state rocket CollectableGoods
-beq state 1 StartMining
-yield
-
-StartTravel:
-s rocket Activate 2
-jal UpdateDisplay
+beqz collectableGoods Travel
+j MiningLoop
 
 Travel:
-yield
-l state launchButton Setting
-beq state 1 Returnhome
-l fuelLeft rocket Fuel
-l returnFuel rocket ReturnFuelCost
-mul returnFuel returnFuel 1.2   #Save some fuel
-bge returnFuel fuelLeft Returnhome
-l mode rocket Mode
-jal UpdateDisplay
-beq mode 3 CheckAvlResources
-beq mode 4 CheckAvlResources
-j Travel
+s rocket Activate 2
+j Main
 
 Returnhome:
 s rocket Activate 5
-yield
-
-Returning:
-l mode rocket Mode
-jal UpdateDisplay
-beq mode 0 Unload
-yield
-j Returning
-
-Unload:
-lb quantity SILO Quantity 1
-beq quantity 0 Init      #if quantity = 0 => Unload completed
-jal UpdateDisplay
-sb SILO Open 1
-yield
-j Unload
+j Main
 
 UpdateDisplay:
-l mode rocket Mode
-lb quantity SILO Quantity 1
-div quantity quantity quantityMax #calc Silo content (quantity / quantityMax => quantity)
+lb siloQantity SILO Quantity 1
+div siloQantity siloQantity quantityMax
 s modeDisplay Color 2 # green
-s modeDisplay Setting mode
-s siloDisplay Setting quantity
+s modeDisplay Setting rocketMode
+s siloDisplay Setting siloQantity
 s siloDisplay Mode 1
 j ra
