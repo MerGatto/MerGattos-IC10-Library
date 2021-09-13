@@ -3,12 +3,15 @@ alias rocket d0
 alias launchButton d1
 alias siloDisplay d2
 alias modeDisplay d3
+alias fuelPump d4
 
 define SILO 906210602
 define OREMINING -2027419821
 define ICEMINING 74521920
 define SCRAPMINING -1446002463
 define GASMINING -1969723301
+
+define TARGETFUELPRESSURE 10000
 
 alias fuelLeft r15
 alias returnFuel r14
@@ -49,6 +52,8 @@ j ra
 HandleIdle: #0
 snez r0 siloQantity
 sb SILO Open r0
+sle r0 fuelLeft TARGETFUELPRESSURE
+s fuelPump On r0
 bnez launchButtonState Countdown
 j ra
 HandleRocketInSpace: #2,3, 4
@@ -64,6 +69,8 @@ j ra
 HandleOutOfFuel: #7
 hcf
 Countdown:
+# ONLY LAUNCH WITH ENOUGH Fuel
+ble fuelLeft TARGETFUELPRESSURE Main
 sb SILO Open 0
 move countdown 10
 s modeDisplay Color 4 # red
