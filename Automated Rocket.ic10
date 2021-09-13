@@ -19,18 +19,13 @@ alias quantityMax r10
 alias countdown r9
 alias collectableGoods r8
 
+Main:
 s rocket Activate 0
 sb OREMINING Activate 0
 sb ICEMINING Activate 0
 sb GASMINING Activate 0
 sb SCRAPMINING Activate 0
-sleep 2
-Main:
 yield
-sb OREMINING Activate 0
-sb ICEMINING Activate 0
-sb GASMINING Activate 0
-sb SCRAPMINING Activate 0
 jal LoadData
 jal UpdateDisplay
 beqal rocketMode 0 HandleIdle # Idle on Launch Pad
@@ -76,8 +71,7 @@ DoingCountdown:
 s modeDisplay Setting countdown
 beqz countdown Launching
 sub countdown countdown 1
-yield
-yield
+sleep 1
 l launchButtonState launchButton Setting
 beq launchButtonState 1 Main # ABORT LAUNCH
 j DoingCountdown
@@ -96,15 +90,8 @@ sb OREMINING Activate 1
 sb ICEMINING Activate 1
 sb GASMINING Activate 1
 sb SCRAPMINING Activate 1
-MiningLoop:
 yield
-jal LoadData
-jal DoFuelCheck
-jal UpdateDisplay
-bnez launchButtonState Returnhome
-s rocket Activate 0
-beqz collectableGoods Travel
-j MiningLoop
+j Main
 
 Travel:
 s rocket Activate 2
