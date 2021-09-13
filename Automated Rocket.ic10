@@ -28,6 +28,8 @@ sb SILO Open 0
 lb quantityMax SILO Maximum 1
 # Real maximum is 6 times higher than reported by the Maximum property
 mul quantityMax quantityMax 6
+lb quantity SILO Quantity 1
+bgt quantity 0 Unload
 
 WaitLaunch:
 l mode rocket Mode
@@ -37,7 +39,8 @@ beq state 1 Countdown
 j WaitLaunch
 
 Countdown:
-move countdown 10 
+move countdown 10
+s modeDisplay Color 4 # red
 DoingCountdown:
 s modeDisplay Setting countdown
 beqz countdown Launching
@@ -118,6 +121,7 @@ UpdateDisplay:
 l mode rocket Mode
 lb quantity SILO Quantity 1
 div quantity quantity quantityMax #calc Silo content (quantity / quantityMax => quantity)
+s modeDisplay Color 2 # green
 s modeDisplay Setting mode
 s siloDisplay Setting quantity
 s siloDisplay Mode 1
