@@ -23,14 +23,15 @@ alias siloQantity r11
 alias quantityMax r10
 alias countdown r9
 alias collectableGoods r8
+alias isUnloading r7
 
 Main:
+yield
 s rocket Activate 0
 sb OREMINING Activate 0
 sb ICEMINING Activate 0
 sb GASMINING Activate 0
 sb SCRAPMINING Activate 0
-yield
 jal LoadData
 jal UpdateDisplay
 beqal rocketMode 0 HandleIdle # Idle on Launch Pad
@@ -52,11 +53,13 @@ l returnFuel rocket ReturnFuelCost
 l launchButtonState launchButton Setting
 j ra
 HandleIdle: #0
-snez r0 siloQantity
-sb SILO Open r0
+snez isUnloading siloQantity
+sb SILO Open isUnloading
 sle r0 fuelLeft TARGETFUELPRESSURE
 s fuelPump On r0
-bnez AUTOSTART Countdown
+nor r0 isUnloading r0
+and r0 r0 AUTOSTART
+bnez r0 Countdown
 bnez launchButtonState Countdown
 j ra
 HandleRocketInSpace: #2,3, 4
@@ -93,7 +96,7 @@ mul returnFuel returnFuel 1.2   #Save some fuel
 bge returnFuel fuelLeft Returnhome
 j ra
 StartMining:
-sleep 1
+yield
 sb OREMINING Activate 1
 sb ICEMINING Activate 1
 sb GASMINING Activate 1
