@@ -60,15 +60,13 @@ bnez AUTOSTART Countdown
 bnez launchButtonState Countdown
 j ra
 HandleRocketInSpace: #2,3, 4
-push ra
 sb SILO Open 0
 bnez launchButtonState Returnhome
 bge siloQantity quantityMax Returnhome
 jal DoFuelCheck
 bnez collectableGoods StartMining
 beqz collectableGoods Travel
-pop ra
-j ra
+j Main
 HandleOutOfFuel: #7
 hcf
 Countdown:
