@@ -6,6 +6,7 @@ alias hotpump d1
 alias coldpump d2
 alias hotsensor d3
 alias coldsensor d4
+alias mainInputControl d5
 
 define DIAL 554524804
 define LED 1944485013
@@ -25,6 +26,9 @@ alias light r15
 
 start:
 yield
+l r0 mainInputControl Setting
+s coldpump On r0
+s hotpump On r0
 s furnace SettingOutput 0
 s furnace SettingInput 100
 s hotpump Setting 0
@@ -63,7 +67,7 @@ mul inputtemp inputtemp minpress #target energy
 l targettemp hotsensor Temperature
 min targettemp maxtemp targettemp
 add targettemp targettemp mintemp
-div mintemp targettemp 2
+div targettemp targettemp 2
 div inputmoles inputtemp targettemp #target moles
 sub inputmoles inputmoles r0 #moles needed
 mul r0 r0 r2 #current energy
