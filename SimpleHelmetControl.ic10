@@ -14,6 +14,10 @@ alias yPos r12
 
 main:
 yield
+# disable all IC functionality when last filter slot is occupied
+ls r0 db 7 Occupied
+bnez r0 main
+
 # load external pressure
 l pressure db PressureExternal
 # load external temperature
@@ -47,11 +51,7 @@ ble pressure MINPRESSURE closeHelmet
 bge temp MAXTEMP closeHelmet
 ble temp MINTEMP closeHelmet
 
-# Open helmet unless the last filter slot is occupied
-ls r0 db 7 Occupied
-beqz r0 openHelmet
-
-j main
+j openHelmet
 
 closeHelmet:
 s helmet Open 0

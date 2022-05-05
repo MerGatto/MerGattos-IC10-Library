@@ -2,19 +2,16 @@ alias dDoorIn d0
 alias dDoorOut d1
 alias dVentIn d2
 alias dVentOut d3
-alias dOverride1 d4 # manual override lever 1 (both need to be active for manual override)
-alias dOverride2 d5 # manual override lever 2 (both need to be active for manual override)
+alias dOtherAirlock d4
 define GASSENSOR -1252983604
 define MOTIONSENSOR -1713470563
 alias openDoor r15
 alias activated r14
 alias pressure r13
-alias overrideActive r12
-alias temperature r11
+alias otherAirlockSetting r11
+alias airlockSetting r10
 define DVENTIN 2
 define DVENTOUT 3
-define CRITHIGHTEMP 323 #50 degree, will close all doors when manual mode is active and this temperature is exceeded
-define CRITLOWTEMP 288 #15 degree, will close all doors when manual mode is active and this temperature is exceeded
 
 s dDoorIn Lock 0
 s dDoorOut Lock 0
@@ -30,6 +27,7 @@ s dVentOut Mode 1
 s dVentOut PressureExternal 0
 s dVentOut PressureInternal 10000000
 s dVentOut On 0
+s db Setting 0
 l r3 dDoorIn Open
 s dDoorIn Setting r3
 l r3 dDoorOut Open
@@ -42,12 +40,12 @@ bdns dDoorIn error
 bdns dDoorOut error
 bdns dVentIn error
 bdns dVentOut error
+bdns dOtherAirlock error
 lb pressure GASSENSOR Pressure 1 #Batch sum
-lb temperature GASSENSOR Temperature 0 #Batch Average
-jal checkOverride # check for manual override
-bnez overrideActive manualOverride
 s dDoorIn Mode 1
 s dDoorOut Mode 1
+l otherAirlockSetting dOtherAirlock Setting
+l airlockSetting db Setting
 jal resetPerson
 l activated dDoorOut Setting
 l r3 dDoorOut Open
@@ -58,8 +56,11 @@ l activated dDoorIn Setting
 sne activated activated r3
 bnez activated run
 lb activated MOTIONSENSOR Activate 3# Batch Max
-add r7 noPerson activated
-beq r7 2 run
+and r7 noPerson activated
+bnez r7 run
+seq r7 airlockSetting otherAirlockSetting
+and r7 noPerson r7
+bnez r7 run
 j loop
 resetPerson:
 lb activated MOTIONSENSOR Activate 3# Batch Max
@@ -74,6 +75,7 @@ s dDoorIn Lock 1
 beqz openDoor runToOut
 j runToIn
 runToIn: # opens the inner door
+s db Setting 1
 s dDoorOut Open 0
 s dDoorOut Setting 0
 move r8 DVENTOUT
@@ -83,6 +85,7 @@ s dDoorIn Open 1
 s dDoorIn Setting 1
 j runFinish
 runToOut: # opens outer door
+s db Setting 2
 s dDoorIn Open 0
 s dDoorIn Setting 0
 move r8 DVENTIN
@@ -101,28 +104,6 @@ j ra
 runFinish: # runFinish
 s dDoorOut Lock 0
 s dDoorIn Lock 0
-j loop
-manualOverride: #Activates manual Control of doors
-bgt temperature CRITHIGHTEMP EmergencyProtocol
-blt temperature CRITLOWTEMP EmergencyProtocol
-s dDoorIn Lock 0
-s dDoorOut Lock 0
-s dDoorIn Mode 0
-s dDoorOut Mode 0
-s dVentIn On 0
-s dVentOut On 0
-j loop
-checkOverride:
-move overrideActive 0
-bdns dOverride1 ra
-bdns dOverride2 ra
-l overrideActive dOverride1 Setting
-l r0 dOverride2 Setting
-and overrideActive overrideActive r0
-j ra
-EmergencyProtocol:
-s dDoorOut Open 0
-s dDoorIn Open 0
 j loop
 error:
 asd

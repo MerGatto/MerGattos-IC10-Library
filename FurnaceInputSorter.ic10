@@ -3,9 +3,6 @@
 # and a Main Input Switch for the Furnace
 
 alias Sorter d0
-alias MainInput d1
-alias CoolantPump d2
-alias HeatPump d3
 
 define ORECLASS 10
 define INGOTClASS 19
@@ -16,10 +13,6 @@ alias itemHash r1
 
 
 Start:
-l r0 MainInput Setting
-s CoolantPump On r0
-s HeatPump On r0
-
 s Sorter Mode 2 # Logic mode
 ls itemClass Sorter 0 Class
 ls itemHash Sorter 0 OccupantHash

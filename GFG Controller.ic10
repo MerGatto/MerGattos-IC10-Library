@@ -1,0 +1,54 @@
+# Constants
+define cHighCharge 0.9
+define cLowCharge 0.2
+define cLowPressure 150
+define cHighPressure 200
+define cMinTemp 290
+
+# Device aliases
+alias dGenerator d0
+alias dChargeReader d1
+alias dVentHeatIn d2
+alias dVentCoolOut d3
+alias dGasSensor d4
+alias dDebug d5
+
+# variables
+alias vCharge r15
+alias vTemp r14
+
+# Set constants
+
+loop:
+s dVentHeatIn Mode 1
+s dVentCoolOut Mode 0
+s dVentHeatIn PressureExternal cLowPressure
+s dVentCoolOut PressureExternal cHighPressure
+
+
+l vTemp dGasSensor Temperature
+sgt r0 vTemp cMinTemp
+
+s dVentHeatIn On 1
+s dVentCoolOut On r0
+
+l vCharge dChargeReader Setting
+
+# activate check
+
+#s dDebug Setting vChargePerc # debug
+bge vCharge cHighCharge deactivate
+ble vCharge cLowCharge activate
+
+yield
+j loop
+
+activate:
+s dGenerator On 1
+yield
+j loop
+
+deactivate:
+s dGenerator On 0
+yield
+j loop

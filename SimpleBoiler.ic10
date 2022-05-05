@@ -1,0 +1,44 @@
+# Slightly adapted version of CowsAreEvil's
+# Gas Heater https://steamcommunity.com/sharedfiles/filedetails/?id=2520701390
+# this version requires ready to use fuel
+
+alias hottank d0
+alias boiler d1
+alias fuelpump d2
+alias extractorpump d3
+
+define MAXPRESSURE 20000
+define HOTTEMP 2000
+define IGNITETMP 50
+
+s db Setting 0
+start:
+l r7 db Setting
+add r7 r7 1
+s db Setting r7
+#ignite if ready
+l r0 boiler RatioOxygen
+sge r0 r0 0.05
+l r1 boiler RatioVolatiles
+sge r1 r1 0.1
+and r0 r0 r1
+s boiler Activate r0
+
+fuelextraction:
+# turn on extractor
+l r0 boiler Temperature
+sge r0 r0 IGNITETMP
+l r1 boiler Pressure
+sge r1 r1 500
+and r0 r0 r1
+s extractorpump On r0
+s extractorpump Setting 1000
+#turn on fuel pump but only when extractor is not ru
+nor r0 r0 r0
+l r1 hottank Pressure
+sle r1 r1 MAXPRESSURE
+and r0 r0 r1
+s fuelpump On r0
+
+yield
+j start
