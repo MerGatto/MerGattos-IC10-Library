@@ -1,4 +1,4 @@
-alias TrackingDish d0
+alias TrackingDish d5
 
 alias maxStrength r15
 alias currentStrength r14
@@ -10,31 +10,34 @@ alias maxH r9
 alias maxV r8
 alias currentSignal r7
 alias direction r6
+alias track r5
+alias trackingSignal r4
 
 s db Setting 0
 move maxStrength 0
+move track -1
+move direction 3
 
-j GetDirectionH
-
-Main:
+Search:
 yield
-
-l currentStrength TrackingDish SignalStrength
-move maxStrength currentStrength
-
-Done:
-s db Setting 999
-
-LoadStuff:
-l currentH TrackingDish Horizontal
-l currentV TrackingDish Vertical
-l currentStrength TrackingDish SignalStrength
-l currentSignal TrackingDish SignalID
-j ra
-
+jal LoadStuff
+s TrackingDish Vertical 45
+add r0 currentH direction
+mod r0 r0 360
+s TrackingDish Horizontal r0
+jal CheckList
+bnez r0 TrackNewSignal
+j Search
+TrackNewSignal:
+add track track 1
+mod track track 5
+s db Setting track
+move sp track
+push currentSignal
+move trackingSignal currentSignal
 GetDirectionH:
 jal LoadStuff
-add r0 currentH 90
+add r0 currentH 3
 move maxStrength currentStrength
 s TrackingDish Horizontal r0
 yield
@@ -43,7 +46,6 @@ sgt r0 currentStrength maxStrength
 move direction 5
 brnez r0 2
 move direction -5
-s db Setting direction
 move maxStrength currentStrength
 j MoveDishH
 
@@ -53,7 +55,6 @@ jal LoadStuff
 add targetH currentH direction
 mod targetH targetH 360
 s TrackingDish Horizontal targetH
-s d1 Setting targetH
 
 blt currentStrength maxStrength GetDirectionV
 move maxH currentH
@@ -73,7 +74,6 @@ sgt r0 currentStrength maxStrength
 move direction 5
 brnez r0 2
 move direction -5
-s db Setting direction
 move maxStrength currentStrength
 j MoveDishV
 
@@ -83,7 +83,6 @@ jal LoadStuff
 add targetV currentV direction
 mod targetV targetV 90
 s TrackingDish Vertical targetV
-s d2 Setting targetV
 
 blt currentStrength maxStrength Final
 move maxV currentV
@@ -93,6 +92,24 @@ yield
 j MoveDishV
 
 Final:
-s TrackingDish Horizontal maxH
-s TrackingDish Vertical maxV
-s db Setting maxStrength
+s dr5 Horizontal maxH
+s dr5 Vertical maxV
+j Search
+CheckList:
+move sp 1
+move r0 0
+LoopList:
+peek r1
+brne currentSignal r1 4
+add sp sp 1
+beq sp 6 ra
+j LoopList
+move r0 1
+j ra
+LoadStuff:
+l currentH TrackingDish Horizontal
+l currentV TrackingDish Vertical
+l currentStrength TrackingDish SignalStrength
+l currentSignal TrackingDish SignalID
+j ra
+
