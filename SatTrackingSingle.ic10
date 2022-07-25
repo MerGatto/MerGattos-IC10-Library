@@ -1,0 +1,120 @@
+alias TrackingDish d0
+alias Dial d1
+alias ResumeButton d2
+alias SaveButton d3
+alias LoadButton d3
+
+define HSTEPBIG 24
+define VSTEPUP 5
+define VSTEPDOWN -1
+alias oldStrength r15
+alias currentStrength r14
+alias trackingSignal r13
+alias currentSignal r12
+alias currentH r11
+alias currentV r10
+alias maxstrength r9
+alias targetH r8
+alias targetV r7
+s db Setting 0
+move targetV 45
+move targetH 180
+jal MoveDish
+move maxstrength 0
+Main:
+yield
+
+l currentStrength TrackingDish SignalStrength
+move maxstrength currentStrength
+
+TrackCurrentSignalBigH:
+s db Setting 1
+add targetH targetH HSTEPBIG
+jal MoveDish
+l currentStrength TrackingDish SignalStrength
+l currentSignal TrackingDish SignalID
+s d3 Setting currentStrength
+s d4 Setting maxstrength
+
+sge r0 currentStrength maxstrength
+seq r1 currentSignal trackingSignal
+and r0 r0 r1
+beqz r0 TrackCurrentSignalSmallHStart
+move maxstrength currentStrength
+j TrackCurrentSignalBigH
+
+TrackCurrentSignalSmallHStart:
+move maxstrength 0
+TrackCurrentSignalSmallH:
+s db Setting 2
+add targetH targetH -1
+jal MoveDish
+l currentStrength TrackingDish SignalStrength
+l currentSignal TrackingDish SignalID
+s d3 Setting currentStrength
+s d4 Setting maxstrength
+
+sge r0 currentStrength maxstrength
+#seq r1 currentSignal trackingSignal
+#and r0 r0 r1
+beqz r0 TrackCurrentSignalVUpStart
+move maxstrength currentStrength
+j TrackCurrentSignalSmallH
+
+TrackCurrentSignalVUpStart:
+move maxstrength 0
+TrackCurrentSignalVUp:
+s db Setting 3
+add targetV targetV VSTEPUP
+jal MoveDish
+l currentStrength TrackingDish SignalStrength
+l currentSignal TrackingDish SignalID
+
+sge r0 currentStrength maxstrength
+#seq r1 currentSignal trackingSignal
+#and r0 r0 r1
+beqz r0 TrackCurrentSignalVDownStart
+move maxstrength currentStrength
+j TrackCurrentSignalVUp
+
+TrackCurrentSignalVDownStart:
+move maxstrength 0
+TrackCurrentSignalVDown:
+s db Setting 4
+add targetV targetV VSTEPDOWN
+jal MoveDish
+l currentStrength TrackingDish SignalStrength
+l currentSignal TrackingDish SignalID
+
+sgt r0 currentStrength maxstrength
+#seq r1 currentSignal trackingSignal
+#and r0 r0 r1
+beqz r0 Done
+move maxstrength currentStrength
+j TrackCurrentSignalVDown
+
+Done:
+s db Setting 999
+
+MoveDish:
+mod targetH targetH 360
+mod targetV targetV 90
+s TrackingDish Horizontal targetH
+s TrackingDish Vertical targetV
+
+s d1 Setting targetH
+s d2 Setting targetV
+
+l currentH TrackingDish Horizontal
+l currentV TrackingDish Vertical
+sub currentH currentH targetH
+abs currentH currentH
+sub currentV currentV targetV
+abs currentV currentV
+
+slt r0 currentH 1
+slt r1 currentV 1
+and r0 r0 r1
+bnez r0 ra
+yield
+j MoveDish
