@@ -1,0 +1,41 @@
+# H2 Filter Control for Vulcan
+# turns vents off during the day
+
+define FILTRATION -348054045
+define TANK_SMALL 1013514688
+
+define MAXPRESSURE 40000
+define MAXATMOSTEMPERATURE 500
+define TARGETTEMPERATURE 300
+
+alias dAtmosSensor d0
+
+alias vPressure r15
+alias vTrigger r14
+alias vAtmosTemperature r13
+alias vMaxTankPressure r12
+
+s db Setting 0
+start:
+#loop counter
+l r0 db Setting
+add r0 r0 1
+s db Setting r0
+
+#check h2 temperature in atmos
+l vAtmosTemperature dAtmosSensor Temperature
+sle vTrigger vAtmosTemperature MAXATMOSTEMPERATURE
+
+#check Pressure in tanks
+lb vMaxTankPressure TANK_SMALL Pressure 3
+sle r0 vMaxTankPressure MAXPRESSURE
+
+and vTrigger vTrigger r0
+
+#check Temperature in tanks
+# not implemented
+
+sb FILTRATION On vTrigger
+
+yield
+j start

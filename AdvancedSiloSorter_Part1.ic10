@@ -30,17 +30,6 @@ alias itemClass r12
 alias itemHash r11
 alias occupied r10
 
-Main:
-yield
-jal Setup
-
-bdseal d0 HandleSorter0
-bdseal d1 HandleSorter1
-bdseal d2 HandleSorter2
-bdseal d3 HandleSorter3
-bdseal d4 HandleSorter4
-bdseal d5 HandleSorter5
-j Main
 
 Setup:
 move r0 0
@@ -50,8 +39,19 @@ s dr0 Mode 2 # Logic mode
 s dr0 On 1
 s dr0 Output -1
 add r0 r0 1
-beq r0 6 ra
+beq r0 6 Main
 j SetupLoop
+
+Main:
+yield
+
+bdseal d0 HandleSorter0
+bdseal d1 HandleSorter1
+bdseal d2 HandleSorter2
+bdseal d3 HandleSorter3
+bdseal d4 HandleSorter4
+bdseal d5 HandleSorter5
+j Main
 
 HandleSorter0: # Manual Input
 move r0 0

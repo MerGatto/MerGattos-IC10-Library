@@ -1,0 +1,52 @@
+# Settings
+define cLow 60000
+define cHigh 60000
+
+# Device aliases
+alias dPA d0
+alias dVP d1
+# optional Release Lever
+alias dRelease d2
+
+#variables
+alias vPressure r0
+alias vRelease r1
+move vRelease 0
+
+# Turn volume Pump off initially
+s dVP On 0
+
+
+loop:
+# make sure Pipe Analyzer is on
+s dPA On 1
+# make sure Volume Pump is locked
+s dVP Lock 1
+brdns dRelease 2
+l vRelease dRelease Open
+beq vRelease 1 releaseValve
+
+l vPressure dPA Pressure
+
+# if vPressure > cHigh { releaseValve }
+bgt vPressure cHigh releaseValve
+# if vPressure < clow { suppressValve }
+blt vPressure cLow suppressValve
+
+#program end
+yield
+j loop
+
+#releaseValve
+releaseValve:
+s dVP On 1
+s dVP Setting 100
+yield
+j loop
+
+#pump end
+suppressValve:
+s dVP On 0
+s dVP Setting 0
+yield
+j loop

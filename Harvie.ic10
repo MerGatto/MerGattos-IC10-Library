@@ -1,0 +1,57 @@
+define HarvieHash 958056199
+define HarvieHash2 -271480358
+define LightSensorHash 1076425094
+define GrowLightHash -1758710260
+
+alias dMatureReader d0
+alias dOccupiedReader d1
+alias dSeedingReader d2
+
+alias vMature r15
+alias vOccupied r14
+alias vWorking r13
+alias vDaylight r12
+alias vGrowLightSwitch r11
+alias vSeeding r10
+
+Loop:
+yield
+l vMature dMatureReader Setting
+l vOccupied dOccupiedReader Setting
+l vSeeding dSeedingReader Setting
+lb vDaylight LightSensorHash Activate 3
+beq vOccupied 0 DoPlant
+beq vMature 1 DoHarvest
+beq vSeeding 1 DoHarvest
+nor vGrowLightSwitch vDaylight vDaylight
+sb GrowLightHash On vGrowLightSwitch
+sb HarvieHash On 0
+sb HarvieHash2 On 0
+j Loop
+
+
+DoPlant:
+sb HarvieHash On 1
+sb HarvieHash2 On 1
+yield
+sb HarvieHash Plant 1
+sb HarvieHash2 Plant 1
+j Working
+
+DoHarvest:
+sb HarvieHash On 1
+sb HarvieHash2 On 1
+yield
+sb HarvieHash Harvest 1
+sb HarvieHash2 Harvest 1
+j Working
+
+Working:
+yield
+lb r0 HarvieHash Activate 0
+seq r0 1 r0
+lb r1 HarvieHash2 Activate 0
+seq r1 1 r1
+or vWorking r1 r0
+beqz vWorking Loop
+j Working

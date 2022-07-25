@@ -48,6 +48,7 @@ lb quantityMax SILO Maximum 1
 mul quantityMax quantityMax 6
 lb siloQantity SILO Quantity 1
 l rocketMode rocket Mode
+breqz rocketMode 2 # can't read collectableGoods when idling
 l collectableGoods rocket CollectableGoods
 l fuelLeft rocket Fuel
 l returnFuel rocket ReturnFuelCost

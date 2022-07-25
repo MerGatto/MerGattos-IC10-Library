@@ -1,0 +1,39 @@
+# Defines in which direction (on the compass) the solarpanel port is looking
+define CONFIG_PanelPortAngle 0
+# Defines in which direction (on the compass) the daylight sensor data port is looking
+define CONFIG_SensorPortAngle 0
+
+# horizontal angles of panels and sensor misalign by -90 degrees
+define CorrectionAngle -90
+define DaylightSensor 1076425094
+define SolarPanel -2045627372
+define SolarPanelDual -539224550
+define SolarPanelHeavy -934345724
+define SolarPanelHeavyDual -1545574413
+
+alias angle r15
+
+Main:
+#Horizontal
+lb angle DaylightSensor Horizontal Average
+sub angle angle CONFIG_PanelPortAngle
+add angle angle CONFIG_SensorPortAngle
+add angle angle CorrectionAngle
+
+mod angle angle 360
+
+sb SolarPanel Horizontal angle
+sb SolarPanelDual Horizontal angle
+sb SolarPanelHeavy Horizontal angle
+sb SolarPanelHeavyDual Horizontal angle
+
+#Vertical
+lb angle DaylightSensor Vertical Average
+sub angle 90 angle
+sb SolarPanel Vertical angle
+sb SolarPanelDual Vertical angle
+sb SolarPanelHeavy Vertical angle
+sb SolarPanelHeavyDual Vertical angle
+
+yield
+j Main
