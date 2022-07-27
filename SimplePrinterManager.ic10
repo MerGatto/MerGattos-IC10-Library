@@ -2,29 +2,52 @@
 # Uses the setting of the stacker to control the amount to be produces by the connected printer
 # Optionaly display a countdown and the current setting on a connected display
 
+# Turns all connected devices of after an amount of ticks (half seconds)
+define TIMEOUT 120
+
 alias Printer d0
 alias Stacker d1
 alias Display d2
 
-alias setting r12
-alias count r13
+alias setting r15
+alias count r14
+alias timeoutCount r13
+alias inTimeOut r12
+alias printerOn r11
 
 Reset:
+move timeoutCount 0
+move inTimeOut 0
 s Printer Activate 0
 brdns Display 2
 s Display Color 2
 
 Main:
+yield
 brdns Display 2
-s Display On 1
-s Printer On 1
-
+l printerOn Printer On
+s Display On printerOn
+s Stacker On printerOn
+brnez printerOn 4
+move inTimeOut 0
+move timeoutCount 0
+s db Setting timeoutCount
 l setting Stacker Setting
 brdns Display 2
 s Display Setting setting
 
 l r0 Printer Activate
 beq r0 1 StartPrinting
+beqz printerOn Main
+add timeoutCount timeoutCount 1
+s db Setting timeoutCount
+blt timeoutCount TIMEOUT Main
+# TIMEOUT
+brdns Display 2
+s Display On 0
+s Printer On 0
+s Stacker On 0
+move inTimeOut 1
 j Main
 
 StartPrinting:

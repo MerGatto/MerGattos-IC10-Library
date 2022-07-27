@@ -1,0 +1,27 @@
+define STIRLING -260316435
+define ACTIVEVENT -1129453144
+
+define HOTTEMP 820
+define COLDTEMP 420
+
+alias coolingValve d0
+alias heatingValve d1
+alias atmosSensor d2
+
+alias doCooling r15
+alias doheating r14
+alias currentTemp r13
+
+Main:
+yield
+l currentTemp atmosSensor Temperature
+sgt doheating currentTemp HOTTEMP
+slt doCooling currentTemp COLDTEMP
+or r0 doCooling doheating
+sb ACTIVEVENT On r0
+sb ACTIVEVENT Mode 1
+sb ACTIVEVENT PressureInternal 45000
+sb STIRLING On doCooling
+s coolingValve On doCooling
+s heatingValve On doheating
+j Main
