@@ -1,126 +1,109 @@
 alias TrackingDish d5
+define searchHStep 5
 alias maxStrength r15
 alias currentStrength r14
 alias currentH r13
-alias targetH r12
-alias currentV r11
-alias targetV r10
-alias maxH r9
-alias maxV r8
-alias currentSignal r7
-alias direction r6
-alias track r5
-alias trackingSignal r4
+alias currentV r12
+alias currentSignal r11
+alias targetH r10
+alias targetV r9
+alias maxH r8
+alias maxV r7
+alias directionV r6
+alias minOut r5
+alias searchV r4
+alias track r3
+alias firstSignal r2
 
-s db Setting 0
-move maxStrength 0
+move sp 0
+move r0 0
+setupLoop:
+push 0
+add r0 r0 1
+blt r0 64 setupLoop
 move track 0
-move direction 5
+s db Setting track
+move maxStrength 0
+move searchV 35
 s TrackingDish Vertical 45
 sleep 2
+jal LoadStuff
+move firstSignal currentSignal
 Search:
 yield
 jal LoadStuff
-add targetH currentH direction
-mod targetH targetH 360
-add targetV currentV direction
-mod targetV targetV 90
+add targetH currentH searchHStep
 s TrackingDish Horizontal targetH
-s TrackingDish Horizontal targetV
-jal CheckList
-bnez r0 TrackNewSignal
-j Search
-TrackNewSignal:
-brlt maxStrength 0.9 3
-add track track 1
-mod track track 5
-s db Setting track
+brgt currentH searchHStep 3
+add searchV searchV 45
+mod searchV searchV 90
+s TrackingDish Vertical searchV
+beq firstSignal currentSignal Search
+jal CheckListForSignal
+# Track new Signal
 s TrackingDish Vertical currentV
-move sp track
-push currentSignal
-move trackingSignal currentSignal
-s db Setting trackingSignal
-GetDirectionH:
-jal LoadStuff
-add r0 currentH 3
-move maxStrength currentStrength
-s TrackingDish Horizontal r0
-yield
-jal LoadStuff
-sgt r0 currentStrength maxStrength
-move direction 5
-brnez r0 2
-move direction -5
-move maxStrength currentStrength
-j MoveDishH
-
 MoveDishH:
-jal LoadStuff
-
-add targetH currentH direction
-mod targetH targetH 360
-s TrackingDish Horizontal targetH
-
-slt r0 currentStrength maxStrength
-seq r1 trackingSignal currentSignal
-and r0 r0 r1
-bnez r0 GetDirectionV
-move maxH currentH
-move maxStrength currentStrength
-
 yield
-j MoveDishH
-
-GetDirectionV:
 jal LoadStuff
-add r0 currentV 15
+add targetH currentH searchHStep
+s TrackingDish Horizontal targetH
+blt currentStrength maxStrength GetDirectionV # maxH found -> Find maxV next
+move maxH currentH
+breq currentStrength maxStrength 2
+move minOut currentH
 move maxStrength currentStrength
-s TrackingDish Vertical r0
+j MoveDishH
+GetDirectionV:
+add r0 minOut maxH
+brge maxH minOut 2
+add r0 r0 360
+div maxH r0 2
+s TrackingDish Horizontal maxH
+sleep 1
+add targetV currentV 5
+move maxStrength currentStrength
+s TrackingDish Vertical targetV
 yield
 jal LoadStuff
 sgt r0 currentStrength maxStrength
-move direction 5
-brnez r0 2
-move direction -5
+select directionV r0 5 -5
 move maxStrength currentStrength
-j MoveDishV
-
 MoveDishV:
 jal LoadStuff
-
-add targetV currentV direction
-mod targetV targetV 90
+add targetV currentV directionV
 s TrackingDish Vertical targetV
-
-slt r0 currentStrength maxStrength
-seq r1 trackingSignal currentSignal
-and r0 r0 r1
-bnez r0 Final
+blt currentStrength maxStrength Final # Max Signal Strength find -> finalize current search
 move maxV currentV
+breq currentStrength maxStrength 2
+move minOut currentV
 move maxStrength currentStrength
-
 yield
 j MoveDishV
 Final:
-s dr5 Horizontal maxH
-s dr5 Vertical maxV
-s TrackingDish Vertical 45
+move firstSignal 0
+add r0 minOut maxV
+brge maxV minOut 2
+add r0 r0 360
+div maxV r0 2
+s dr3 Horizontal maxH
+s dr3 Vertical maxV
+move sp track
+push currentSignal
+add track track 1
+mod track track 5
+s db Setting track
 j Search
-CheckList:
-move sp 1
-move r0 0
-LoopList:
-peek r1
-brne currentSignal r1 4
-add sp sp 1
-beq sp 6 ra
-j LoopList
-move r0 1
-j ra
 LoadStuff:
 l currentH TrackingDish Horizontal
 l currentV TrackingDish Vertical
 l currentStrength TrackingDish SignalStrength
 l currentSignal TrackingDish SignalID
 j ra
-
+CheckListForSignal:
+move sp 1
+LoopList: # loop 1 to 5
+peek r0
+beq currentSignal r0 Search
+add sp sp 1
+bne sp 6 LoopList
+j ra
