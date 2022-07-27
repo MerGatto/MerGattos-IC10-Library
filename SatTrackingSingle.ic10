@@ -1,4 +1,5 @@
 alias TrackingDish d5
+define searchHStep 5
 alias maxStrength r15
 alias currentStrength r14
 alias currentH r13
@@ -8,15 +9,15 @@ alias targetV r10
 alias maxH r9
 alias maxV r8
 alias currentSignal r7
-alias direction r6
+alias directionV r6
 alias oldSignal r5
 alias minOut r4
-alias maxOut r5
+alias searchV r3
 
 setup:
 s db Setting 0
 move maxStrength 0
-move direction 5
+move searchV 35
 s TrackingDish Vertical 45
 sleep 2
 jal LoadStuff
@@ -24,75 +25,57 @@ move oldSignal currentSignal
 Search:
 yield
 jal LoadStuff
-add targetH currentH direction
-mod targetH targetH 360
+add targetH currentH searchHStep
 s TrackingDish Horizontal targetH
-s TrackingDish Vertical 45
-bne oldSignal currentSignal TrackNewSignal
-j Search
-TrackNewSignal:
+brgt currentH searchHStep 3
+add searchV searchV 45
+mod searchV searchV 90
+s TrackingDish Vertical searchV
+beq oldSignal currentSignal Search
+# Track new Signal
 s TrackingDish Vertical currentV
-s db Setting currentSignal
 MoveDishH:
 yield
 jal LoadStuff
-add targetH currentH direction
-mod targetH targetH 360
+add targetH currentH searchHStep
 s TrackingDish Horizontal targetH
-
-slt r0 currentStrength maxStrength
-bnez r0 GetDirectionV
-sgt r0 currentStrength maxStrength
+blt currentStrength maxStrength GetDirectionV # maxH found -> Find maxV next
+move maxH currentH
 breq currentStrength maxStrength 2
 move minOut currentH
 move maxStrength currentStrength
-move maxH currentH
 j MoveDishH
-
 GetDirectionV:
-jal LoadStuff
 add r0 minOut maxH
 brge maxH minOut 2
 add r0 r0 360
-div r0 r0 2
-move maxH r0
+div maxH r0 2
 s TrackingDish Horizontal maxH
 sleep 1
-GetVDirection:
-add r0 currentV 15
+add targetV currentV 15
 move maxStrength currentStrength
-s TrackingDish Vertical r0
+s TrackingDish Vertical targetV
 yield
 jal LoadStuff
 sgt r0 currentStrength maxStrength
-move direction 5
-brnez r0 2
-move direction -5
+select directionV r0 5 -5
 move maxStrength currentStrength
-j MoveDishV
-
 MoveDishV:
 jal LoadStuff
-
-add targetV currentV direction
-mod targetV targetV 90
+add targetV currentV directionV
 s TrackingDish Vertical targetV
-
-slt r0 currentStrength maxStrength
-bnez r0 Final
+blt currentStrength maxStrength Final # Max Signal Strength find -> finalize current search
+move maxV currentV
 breq currentStrength maxStrength 2
 move minOut currentV
-move maxV currentV
 move maxStrength currentStrength
-
 yield
 j MoveDishV
 Final:
 add r0 minOut maxV
 brge maxV minOut 2
 add r0 r0 360
-div r0 r0 2
-move maxV r0
+div maxV r0 2
 s d5 Horizontal maxH
 s d5 Vertical maxV
 j error
