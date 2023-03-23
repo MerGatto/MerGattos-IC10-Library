@@ -7,7 +7,6 @@ alias boiler d1
 alias fuelpump d2
 alias extractorpump d3
 alias wastetank d4
-alias hottopup d5
 
 define MAXPRESSURE 20000
 define HOTTEMP 2000
@@ -25,15 +24,6 @@ l r1 boiler RatioVolatiles
 sge r1 r1 0.1
 and r0 r0 r1
 s boiler Activate r0
-
-#check for hot top up
-bdns wastetank fuelextraction
-l r0 wastetank Temperature
-sge r0 r0 HOTTEMP
-l r1 hottank Pressure
-slt r1 r1 MAXPRESSURE
-and r0 r0 r1
-s hottopup On r0
 
 fuelextraction:
 # turn on extractor
