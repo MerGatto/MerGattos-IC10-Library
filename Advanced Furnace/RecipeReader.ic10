@@ -5,7 +5,9 @@
 
 define DIAL 554524804
 start:
+yield
 lb sp DIAL Setting Average
+s db Setting sp
 mul sp sp 9
 add sp sp 9
 pop r0

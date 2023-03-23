@@ -13,6 +13,7 @@ alias itemHash r1
 
 
 Start:
+yield
 s Sorter Mode 2 # Logic mode
 ls itemClass Sorter 0 Class
 ls itemHash Sorter 0 OccupantHash

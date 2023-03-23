@@ -1,3 +1,14 @@
+# GFG Controller
+# The GFG needs to be placed in the middle of a 2x1x1 BOX
+# with vents placed on the opposite side
+# the Acttive Heating Vent needs to be placed inside of the box
+# The Cooling Box can be placed on either side but 2 lines of code need to be adapted
+# on line 32
+
+# The GFG can be connected to a battery charge reader (eg a memory) and will only run
+# from lowCharge to highCharge
+# if not connected the GFG will run permanently
+
 # Constants
 define cHighCharge 0.9
 define cLowCharge 0.2
@@ -7,11 +18,10 @@ define cMinTemp 290
 
 # Device aliases
 alias dGenerator d0
-alias dChargeReader d1
-alias dVentHeatIn d2
-alias dVentCoolOut d3
-alias dGasSensor d4
-alias dDebug d5
+alias dVentHeat d1
+alias dVentCool d2
+alias dGasSensor d3
+alias dChargeReader d4
 
 # variables
 alias vCharge r15
@@ -20,23 +30,32 @@ alias vTemp r14
 # Set constants
 
 loop:
-s dVentHeatIn Mode 1
-s dVentCoolOut Mode 0
-s dVentHeatIn PressureExternal cLowPressure
-s dVentCoolOut PressureExternal cHighPressure
+yield
+s dVentHeat Mode 1
 
+# Mode 1 (IN) if Vent is placed outside of gfg box (Eg on Europa)
+s dVentCool Mode 1
+s dVentCool PressureInternal cHighPressure
+
+# Mode 0 if Vent is placed inside of GFG Box (EG with a cooling pipeline on other planets)
+#s dVentCool Mode 0
+#s dVentCool PressureExternal cHighPressure
+
+s dVentHeat PressureExternal cLowPressure
 
 l vTemp dGasSensor Temperature
 sgt r0 vTemp cMinTemp
 
-s dVentHeatIn On 1
-s dVentCoolOut On r0
+s dVentHeat On 1
+s dVentCool On r0
+
+# if no ChargeReader is set we let the gfg run permanently
+bdns dChargeReader activate
 
 l vCharge dChargeReader Setting
 
 # activate check
 
-#s dDebug Setting vChargePerc # debug
 bge vCharge cHighCharge deactivate
 ble vCharge cLowCharge activate
 
@@ -45,10 +64,8 @@ j loop
 
 activate:
 s dGenerator On 1
-yield
 j loop
 
 deactivate:
 s dGenerator On 0
-yield
 j loop

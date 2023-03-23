@@ -1,0 +1,31 @@
+# Controls the connected Device to turn on or off when a certain Threshold is met
+
+define PRESSURETHRESHOLD 1000
+
+alias dPipeAnalyzer d0
+alias dFilter1 d1
+alias dFilter1 d2
+alias dFilter1 d3
+alias dFilter1 d4
+alias dFilter1 d5
+
+alias vPressure r15
+
+main:
+yield
+s dPipeAnalyzer On 1
+l vPressure dPipeAnalyzer Pressure
+#sgt r0 vPressure PRESSURETHRESHOLD # Turn On when Pipe Pressure exceeds Threshold
+slt r0 vPressure PRESSURETHRESHOLD # Turn On when Pipe Pressure is less than Threshold
+
+brdns d1 2
+s d1 On r0
+brdns d2 2
+s d2 On r0
+brdns d3 2
+s d3 On r0
+brdns d4 2
+s d4 On r0
+brdns d5 2
+s d5 On r0
+j main

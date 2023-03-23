@@ -1,0 +1,19 @@
+# Controls the connected Device to turn on or off when a certain Threshold is met
+
+define THRESHOLD 20000
+alias vPressure r15
+
+main:
+yield
+l vPressure db PressureOutput
+#l vPressure db PressureInput
+
+# Turn On when Pipe Pressure exceeds Threshold
+#sgt r0 vPressure THRESHOLD 
+
+# Turn On when Pipe Pressure is less than Threshold
+slt r0 vPressure THRESHOLD 
+
+s db Mode r0
+
+j main
