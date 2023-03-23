@@ -6,7 +6,6 @@ alias hottank d0
 alias boiler d1
 alias fuelpump d2
 alias extractorpump d3
-alias wastetank d4
 
 define MAXPRESSURE 20000
 define HOTTEMP 2000
