@@ -1,0 +1,61 @@
+alias centrifuge db
+alias currentStress r15
+alias currentSetting r14
+alias currentRpm r13
+alias i r12
+
+define TIMEOUT 10
+# define STRESSTHRESHOLD 15
+
+Init:
+	move currentSetting 0
+	move i 0
+	s centrifuge Throttle currentSetting
+	s centrifuge CombustionLimiter currentSetting
+	j Adjust
+
+Main:
+	yield
+	# check if reset is required
+	# if Rpm is 0 AND currentSetting is > 10
+	l currentRpm centrifuge Rpm
+	seqz r0 currentRpm
+	sgt r1 currentSetting 10
+	and r0 r0 r1
+	bnez r0 Init
+	
+	# set Throttle and Limit every Tick to prevent manual interruptions
+	s centrifuge Throttle currentSetting
+	s centrifuge CombustionLimiter currentSetting
+	
+	# Only Adjust every 10 Ticks (configurable)
+	add i i 1	
+	bgt i TIMEOUT Adjust
+	j Main
+	
+Adjust:
+	move i 0
+	l currentSetting centrifuge Throttle
+	l currentStress centrifuge Stress
+	bgt currentStress 90  Init
+	blez currentStress IncreaseSetting
+	# bgt currentStress STRESSTHRESHOLD  DecreaseSetting
+j Main
+	
+IncreaseSetting:
+	add currentSetting currentSetting 10
+	min currentSetting currentSetting 100
+	max currentSetting currentSetting 0
+	s centrifuge Throttle currentSetting
+	s centrifuge CombustionLimiter currentSetting
+j Main
+
+# currently not in use
+# centrifuge will run to max and then reset after it's been turned off
+DecreaseSetting:
+	sub currentSetting currentSetting 10
+	min currentSetting currentSetting 100
+	max currentSetting currentSetting 0
+	s centrifuge Throttle currentSetting
+	s centrifuge CombustionLimiter currentSetting
+j Main
