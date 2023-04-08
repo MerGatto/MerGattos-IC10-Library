@@ -1,38 +1,34 @@
 #Automatic Advanced Furnace Controller by CowsAreEvil
 #https://steamcommunity.com/sharedfiles/filedetails/?id=2520700872
 #this version has no automatic ejection of processed items
-alias furnace d0
-alias hotpump d1
-alias coldpump d2
-alias hotsensor d3
-alias coldsensor d4
-alias mainInputControl d5
+alias hotpump d0
+alias coldpump d1
+alias hotsensor d2
+alias coldsensor d3
+alias mainInputControl d4
+alias manualSwitch d5
 
 define DIAL 554524804
+define FURNACE 545937711
 
-alias targettemp r4
-alias hotsetting r5
-alias coldsetting r6
-alias inputspeed r7
-alias inputtemp r8
-alias inputmoles r9
-alias ingothash r10
-alias mintemp r11
-alias maxtemp r12
-alias minpress r13
-alias maxpress r14
+alias targettemp r15
+alias hotsetting r14
+alias coldsetting r13
+alias inputspeed r12
+alias inputtemp r11
+alias inputmoles r10
+alias ingothash r9
+alias mintemp r8
+alias maxtemp r7
+alias minpress r6
+alias maxpress r5
+alias targetpress r4
 
 start:
 yield
-	l r0 mainInputControl Setting
-	blez r0 start
-	s coldpump On r0
-	s hotpump On r0
-	s furnace SettingOutput 0
-	s furnace SettingInput 100
-	s hotpump Setting 0
-	s coldpump Setting 0
 	#load data
+	sb FURNACE SettingInput 100
+	sb FURNACE On 1
 	lb sp DIAL Setting Average
 	mul sp sp 9
 	add sp sp 5
@@ -42,25 +38,37 @@ yield
 	pop mintemp
 	pop ingothash
 	s db Setting ingothash
+	l r0 manualSwitch Setting
+	bnez r0 start
+	l r0 mainInputControl Setting
+	s coldpump On r0
+	s hotpump On r0	
+	sb FURNACE SettingOutput 0
+	s hotpump Setting 0
+	s coldpump Setting 0
+	beqz r0 start
 	# Check pressure and temp in alloy zone
-	l r0 furnace Pressure
+	lb r0 FURNACE Pressure 0
 	bgt r0 maxpress makeadjustment
 	blt r0 minpress makeadjustment
-	l r0 furnace Temperature
+	lb r0 FURNACE  Temperature 0
 	bgt r0 maxtemp makeadjustment
 	blt r0 mintemp makeadjustment
 	j start
 makeadjustment:
 	#find input gas temp
-	l r0 furnace TotalMoles
+	lb r0 FURNACE TotalMoles 0
 	max r0 r0 0.1
-	l r1 furnace Pressure
+	lb r1 FURNACE Pressure 0
 	max r1 r1 0.1
-	l r2 furnace Temperature
+	lb r2 FURNACE Temperature 0
 	max r2 r2 0.1
 	div inputtemp r0 r1
 	mul inputtemp inputtemp r2
-	mul inputtemp inputtemp minpress #target energy
+	min targetpress maxpress 60000
+	add targetpress minpress targetpress
+	div targetpress targetpress 2	
+	mul inputtemp inputtemp targetpress #target energy
 	l targettemp hotsensor Temperature
 	min targettemp maxtemp targettemp
 	add targettemp targettemp mintemp
@@ -88,8 +96,8 @@ makeadjustment:
 	l r0 hotsensor Pressure
 	div hotsetting hotsetting r0
 	#Throttle down foe target pressure
-	l r0 furnace Pressure
-	sub r0 minpress r0
+	lb r0 FURNACE Pressure 0
+	sub r0 targetpress r0
 	div r0 r0 70  #input gain
 	max r0 r0 0
 	min inputspeed r0 50
@@ -98,12 +106,12 @@ makeadjustment:
 	mul hotsetting hotsetting r0
 	mul coldsetting coldsetting r0
 	#Dump pressure if required
-	blez coldsetting reducepressure
+	#blez coldsetting reducepressure
 	blez hotsetting reducepressure
 	#Activate pumps
 	s coldpump Setting coldsetting
 	s hotpump Setting hotsetting
 	j start
 reducepressure:
-	s furnace SettingOutput 50
+	sb FURNACE SettingOutput 50
 	j start
