@@ -1,33 +1,38 @@
-define HarvieHash 958056199
-define HarvieHash2 -271480358
-define LightSensorHash 1076425094
-define GrowLightHash -1758710260
+define HarvieHash HASH("StructureHarvie")
+define HarvieHash2 HASH("StructureHarvieReversed")
+define HydroPonicHash HASH("StructureHydroponicsTrayData")
 
-alias dMatureReader d0
-alias dOccupiedReader d1
-alias dSeedingReader d2
+alias vHarvieCount r15
+alias vHarvieCount2 r14
 
-alias vMature r15
-alias vOccupied r14
-alias vWorking r13
-alias vDaylight r12
-alias vGrowLightSwitch r11
-alias vSeeding r10
-
-Loop:
+Main:
 yield
-l vMature dMatureReader Setting
-l vOccupied dOccupiedReader Setting
-l vSeeding dSeedingReader Setting
-lb vDaylight LightSensorHash Activate 3
-beq vOccupied 0 DoPlant
-beq vMature 1 DoHarvest
-beq vSeeding 1 DoHarvest
-nor vGrowLightSwitch vDaylight vDaylight
-sb GrowLightHash On vGrowLightSwitch
+#check planting
+# check if this works when device is not there (min still 0?)
+jal CountHarvies
+move r0 1 # happy default
+move r1 1 # happy default
+breqz vHarvieCount 2
+lb r0 HarvieHash Mode Minimum
+breqz vHarvieCount2 2
+lb r1 HarvieHash2 Mode Minimum
+min r0 r1 r0
+beqz r0 DoPlant
+
+#check harvesting
+#check seeding stage
+lbs r0 HydroPonicHash 0 Growth Minimum
+beq r0 5 DoHarvest
+
+#check removed seeds
+sge r0 r0 4 # 4 == mature
+lbs r1 HydroPonicHash 0 Seeding Minimum
+sge r1 r1 0 # might need correcting 0 == seeding stage but no seed
+and r0 r0 r1
+bnez r0 DoHarvest
 sb HarvieHash On 0
 sb HarvieHash2 On 0
-j Loop
+j Main
 
 
 DoPlant:
@@ -48,10 +53,20 @@ j Working
 
 Working:
 yield
-lb r0 HarvieHash Activate 0
-seq r0 1 r0
-lb r1 HarvieHash2 Activate 0
-seq r1 1 r1
-or vWorking r1 r0
-beqz vWorking Loop
-j Working
+jal CountHarvies
+move r0 -1
+move r1 -1
+breqz vHarvieCount 2
+lb r0 HarvieHash Activate Maximum
+breqz vHarvieCount2 2
+lb r1 HarvieHash2 Activate Maximum
+max r0 r0 r1
+bge r0 1 Working
+j Main
+
+CountHarvies:
+lb r0 HarvieHash PrefabHash Sum
+div vHarvieCount r0 HarvieHash
+lb r0 HarvieHash2 PrefabHash Sum
+div vHarvieCount2 r0 HarvieHash2
+j ra
