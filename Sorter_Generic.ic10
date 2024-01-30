@@ -1,0 +1,28 @@
+#GENERIC SORTER
+# Sorts the searched item to the right output
+
+define LookupItem HASH("Hay")
+
+alias Sorter d0
+
+s Sorter Mode 2 # Logic mode
+
+Main:
+yield
+s Sorter Mode 2 # Logic mode
+l r0 Sorter Output
+bne r0 -1 Main # Still busy
+ls r0 Sorter 0 Occupied
+beqz r0 Main # nothing here
+ls r0 Sorter 0 OccupantHash
+
+beq r0 LookupItem True
+j False
+
+False:
+s Sorter Output 0 #Left output
+j Main
+
+True:
+s Sorter Output 1 #Right output
+j Start
