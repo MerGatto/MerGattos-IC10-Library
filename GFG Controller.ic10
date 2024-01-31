@@ -2,10 +2,10 @@
 # The GFG needs to be placed in the middle of a 2x1x1 BOX
 # with vents placed on the opposite side
 # the Acttive Heating Vent needs to be placed inside of the box
-# The Cooling Box can be placed on either side but 2 lines of code need to be adapted
+# The Cooling Vent can be placed on either side but 2 lines of code need to be adapted
 # on line 32
 
-# The GFG can be connected to a battery charge reader (eg a memory) and will only run
+# The GFG can be connected to a battery charge reader (eg a memor unity) and will only run
 # from lowCharge to highCharge
 # if not connected the GFG will run permanently
 
@@ -13,7 +13,7 @@
 define cHighCharge 0.9
 define cLowCharge 0.2
 define cLowPressure 150
-define cHighPressure 200
+define cHighPressure 160
 define cMinTemp 290
 
 # Device aliases
@@ -26,6 +26,7 @@ alias dChargeReader d4
 # variables
 alias vCharge r15
 alias vTemp r14
+alias vPressure r13
 
 # Set constants
 
@@ -35,19 +36,26 @@ s dVentHeat Mode 1
 
 # Mode 1 (IN) if Vent is placed outside of gfg box (Eg on Europa)
 s dVentCool Mode 1
-s dVentCool PressureInternal cHighPressure
+s dVentCool PressureInternal 1000
+s dVentCool PressureExternal 0
 
 # Mode 0 if Vent is placed inside of GFG Box (EG with a cooling pipeline on other planets)
 #s dVentCool Mode 0
 #s dVentCool PressureExternal cHighPressure
+#s dVentCool PressureInternal 500
 
-s dVentHeat PressureExternal cLowPressure
+s dVentHeat PressureExternal 0
+s dVentHeat PressureInternal 50000
 
 l vTemp dGasSensor Temperature
+l vPressure dGasSensor Pressure
+slt r1 vPressure cLowPressure
 sgt r0 vTemp cMinTemp
+or r0 r1 r0
 
-s dVentHeat On 1
 s dVentCool On r0
+sgt r0 vPressure cHighPressure
+s dVentHeat On r0
 
 # if no ChargeReader is set we let the gfg run permanently
 bdns dChargeReader activate

@@ -1,0 +1,22 @@
+define NIGHT_TIME_MINUTES 5
+define TOTAL_DAY_MINUTES 20
+define HYDRO_STATION 1441767298
+define GROW_LIGHT -1758710260
+
+alias vDayTimeSeconds r15
+alias vNightTimeSeconds r14
+
+move vDayTimeSeconds TOTAL_DAY_MINUTES
+sub vDayTimeSeconds vDayTimeSeconds NIGHT_TIME_MINUTES
+mul vDayTimeSeconds vDayTimeSeconds 60
+mul vNightTimeSeconds NIGHT_TIME_MINUTES 60
+
+
+main:
+sb HYDRO_STATION On 1
+sb GROW_LIGHT On 1
+sleep vDayTimeSeconds
+sb HYDRO_STATION On 0
+sb GROW_LIGHT On 0
+sleep vNightTimeSeconds
+j main

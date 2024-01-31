@@ -1,7 +1,7 @@
 # Defines in which direction (on the compass) the solarpanel port is looking
-define CONFIG_PanelPortAngle 0
+define CONFIG_PanelPortAngle 180
 # Defines in which direction (on the compass) the daylight sensor data port is looking
-define CONFIG_SensorPortAngle 0
+define CONFIG_SensorPortAngle 180
 
 # horizontal angles of panels and sensor misalign by -90 degrees
 define CorrectionAngle -90

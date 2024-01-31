@@ -1,0 +1,127 @@
+# Satellite dish controller by CowsAreEvil
+# Will scan the sky for traders and interrogate
+alias dish d0   # Small, medium or large dish
+alias light d1  # LED
+alias largedish d2 # Optional
+alias dial d3   # Optional for eTrade (mod required)
+alias stepv r5
+alias steph r6
+alias oldstrength r7
+alias newh r8
+alias newv r9
+alias trader r10
+move stepv 1
+move steph 1
+
+push 0
+push -1374574351
+push -1077922067
+push 54412100
+push 175935584
+push -470575659
+
+seek:  # Scan the sky for contacts
+move sp 0
+brdns dial 2
+l sp dial Setting
+add sp sp 1
+peek trader
+alias dish d0
+s light Color 3
+l r2 dish SignalStrength
+sgtz r2 r2
+l r1 dish InterrogationProgress
+slez r1 r1
+and r2 r2 r1
+breqz trader 4
+l r1 dish SignalID
+seq r1 r1 trader
+and r2 r2 r1
+bgtz r2 htrack
+l newh dish Horizontal
+l newv dish Vertical
+add newh newh 30
+brlt newh 360 5
+sub newh newh 360
+add newv newv 15
+brlt newv 90 2
+move newv 15
+s dish Horizontal newh
+s dish Vertical newv
+l r1 dish PrefabHash
+seq r0 r1 -2138748650 # if it is a small dish
+select r0 r0 10 30
+seq r1 r1 1913391845 # if it is a large dish
+select r0 r1 100 r0
+sleep r0
+j seek
+
+htrack:  #Contact found. Aim dish horizontal
+s light Color 5
+l r0 dish MinimumWattsToContact
+l r1 dish WattsReachingContact
+blt r0 r1 contact
+brdse largedish 3
+l r1 dish Setting
+bgt r0 r1 seek
+move oldstrength r2
+l r0 dish Horizontal
+div newh r2 4
+mul newh newh steph
+add newh newh r0
+s dish Horizontal newh
+hwait:
+yield
+l r0 dish InterrogationProgress
+bgtz r0 seek
+l r2 dish SignalStrength
+beq r2 -1 hwait
+brdns largedish 2
+blt r2 1 passover
+slt r0 r2 oldstrength
+beq r0 1 vtrack
+mul steph steph -1
+j htrack
+
+vtrack:  #Contact found. aim dish vertical
+move oldstrength r2
+l r0 dish Vertical
+div newv r2 4
+mul newv newv stepv
+add newv newv r0
+s dish Vertical newv
+vwait:
+yield
+l r2 dish SignalStrength
+beq r2 -1 vwait
+slt r0 r2 oldstrength
+beq r0 1 htrack
+mul stepv stepv -1
+j vtrack
+
+contact:   #Within contact range so make contact
+s light Color 2
+s dish Activate 1
+interrogate:
+yield
+l r0 dish InterrogationProgress
+bne r0 1 interrogate
+l r0 db Setting
+add r0 r0 1
+s db Setting r0
+brdns largedish 2
+s largedish On 0
+j seek
+
+passover:  #Dish not powerful enough so use big dish
+l newv dish Vertical
+l newh dish Horizontal
+alias dish d2
+s dish On 1
+s dish Vertical newv
+s dish Horizontal newh
+pwait:
+yield
+l r0 dish SignalID
+beq r0 -1 pwait
+j contact

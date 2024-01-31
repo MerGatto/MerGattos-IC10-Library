@@ -1,0 +1,92 @@
+# Original Script by Elmotrix
+alias Pump d0
+alias InputSensor d1
+#Input sensor is only needed when the AC -
+#got a passive vent on the waste port.
+
+define MaxOutputPres 30000
+define moleFactor 0 #0-1
+define AutoFlowControl 1  #0/1
+#^^ this will automaticly balance pressure, disable
+#if you only want max effiency and minimum flow
+#(leave it on if you are unsure)
+define maxDelta 54
+define MaxPumpSetting 30
+define MinTemperature 
+
+alias TempOut r5
+alias TempIn r6
+alias PresIn r7
+alias volume r8
+alias TempWaste r9
+alias IsCooling r10
+alias PresOut r11
+alias IsIO r12
+
+Start:
+sdns IsIO Pump
+l r0 db Setting
+yield
+blt r0 4 ReadData
+bgt r0 1272 ReadData
+seqz IsCooling IsCooling
+select r1 IsCooling 3.15 1272.15
+s db Setting r1
+ReadData:
+l TempWaste db TemperatureOutput2
+l PresOut db PressureOutput
+l TempOut db TemperatureOutput
+bdns Pump InputReader
+bdns InputSensor WasteReader
+l r0 InputSensor PrefabHash
+beq r0 435685051 AnalyserReader
+beq r0 -348054045 ACOutputReader
+beq r0 -2087593337 ACOutputReader
+CalcFlow:
+select TempOut TempOut TempOut TempIn
+div r1 PresIn PresOut
+sub r1 r1 1
+min r1 r1 AutoFlowControl
+max r1 r1 moleFactor
+
+sub r0 750 111.4575
+mul r0 r0 r1
+add r0 r0 111.4575
+mul r0 r0 100
+#div r0 r0 TempOut
+#mul r0 r0 TempIn
+div volume r0 PresIn
+slt r0 volume MaxPumpSetting
+SetMode:
+or r0 r0 IsIO
+sub r1 TempWaste TempIn
+select r2 IsCooling 1 -1
+mul r1 r1 r2
+slt r1 r1 maxDelta
+and r0 r0 r1
+slt r1 PresOut MaxOutputPres
+and r0 r0 r1
+l r1 db Open
+seqz r1 r1
+and r0 r0 r1
+s db Mode r0
+bdns Pump Start
+s Pump On r0
+s Pump Setting volume
+j Start
+WasteReader:
+l PresIn db PressureOutput2
+l TempIn db TemperatureOutput2
+j CalcFlow
+AnalyserReader:
+l PresIn InputSensor Pressure
+l TempIn InputSensor Temperature
+j CalcFlow
+ACOutputReader:
+l PresIn InputSensor PressureOutput
+l TempIn InputSensor TemperatureOutput
+j CalcFlow
+InputReader:
+l PresIn db PressureInput
+l TempIn db TemperatureInput
+j SetMode

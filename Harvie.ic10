@@ -10,14 +10,14 @@ yield
 #check planting
 # check if this works when device is not there (min still 0?)
 jal CountHarvies
-move r0 1 # happy default
-move r1 1 # happy default
-breqz vHarvieCount 2
-lb r0 HarvieHash Mode Minimum
-breqz vHarvieCount2 2
-lb r1 HarvieHash2 Mode Minimum
-min r0 r1 r0
-beqz r0 DoPlant
+#move r0 1 # happy default
+#move r1 1 # happy default
+#breqz vHarvieCount 2
+#lb r0 HarvieHash Mode Minimum
+#breqz vHarvieCount2 2
+#lb r1 HarvieHash2 Mode Minimum
+#min r0 r1 r0
+#beqz r0 DoPlant
 
 #check harvesting
 #check seeding stage

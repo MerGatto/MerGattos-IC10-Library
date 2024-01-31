@@ -103,14 +103,14 @@ s dDoorOut Lock 0
 s dDoorIn Lock 0
 j loop
 manualOverride: #Activates manual Control of doors
-bgt temperature CRITHIGHTEMP EmergencyProtocol
-blt temperature CRITLOWTEMP EmergencyProtocol
 s dDoorIn Lock 0
 s dDoorOut Lock 0
 s dDoorIn Mode 0
 s dDoorOut Mode 0
 s dVentIn On 0
 s dVentOut On 0
+bgt temperature CRITHIGHTEMP EmergencyProtocol
+blt temperature CRITLOWTEMP EmergencyProtocol
 j loop
 checkOverride:
 move overrideActive 0

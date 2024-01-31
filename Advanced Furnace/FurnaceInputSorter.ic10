@@ -12,13 +12,14 @@ alias itemClass r0
 alias itemHash r1
 
 
-Start:
+main:
 yield
 s Sorter Mode 2 # Logic mode
 ls itemClass Sorter 0 Class
 ls itemHash Sorter 0 OccupantHash
 ls r1 Sorter 0 Occupied
 s db Setting r1
+beqz occupied main
 
 
 beq itemClass ORECLASS True
@@ -27,8 +28,8 @@ beq itemHash BIOMASS True
 
 
 s d0 Output 0 #Left output
-j Start
+j main
 
 True:
 s d0 Output 1 #Right output
-j Start
+j main

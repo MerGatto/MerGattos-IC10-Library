@@ -1,4 +1,4 @@
-alias TrackingDish d5
+alias TrackingDish d0
 define searchHStep 5
 alias maxStrength r15
 alias currentStrength r14

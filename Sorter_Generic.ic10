@@ -9,6 +9,7 @@ s Sorter Mode 2 # Logic mode
 
 Main:
 yield
+s Sorter On 1
 s Sorter Mode 2 # Logic mode
 l r0 Sorter Output
 bne r0 -1 Main # Still busy
@@ -25,4 +26,4 @@ j Main
 
 True:
 s Sorter Output 1 #Right output
-j Start
+j Main

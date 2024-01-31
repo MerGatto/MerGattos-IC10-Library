@@ -32,11 +32,13 @@ sub vLowTemp vTargetTemp TEMPTOLERANCE
 #check cold temp
 l r0 targetPipe Temperature
 sgt r0 r0 vHighTemp
+brdns coolValve 2
 s coolValve On r0
 
 #check hot temp
 l r0 targetPipe Temperature
 slt r0 r0 vLowTemp
+brdns heatValve 2
 s heatValve On r0
 
 yield

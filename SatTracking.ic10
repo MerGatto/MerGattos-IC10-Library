@@ -30,6 +30,7 @@ sleep 2
 jal LoadStuff
 move firstSignal currentSignal
 Search:
+s db Setting 1
 yield
 jal LoadStuff
 add targetH currentH searchHStep
@@ -41,8 +42,11 @@ s TrackingDish Vertical searchV
 beq firstSignal currentSignal Search
 jal CheckListForSignal
 # Track new Signal
+move maxStrength currentStrength
+move minOut currentH
 s TrackingDish Vertical currentV
 MoveDishH:
+s db Setting 2
 yield
 jal LoadStuff
 add targetH currentH searchHStep
@@ -54,12 +58,14 @@ move minOut currentH
 move maxStrength currentStrength
 j MoveDishH
 GetDirectionV:
+s db Setting 3
 add r0 minOut maxH
 brge maxH minOut 2
 add r0 r0 360
 div maxH r0 2
 s TrackingDish Horizontal maxH
 sleep 1
+s db Setting 4
 add targetV currentV 5
 move maxStrength currentStrength
 s TrackingDish Vertical targetV
@@ -69,9 +75,12 @@ sgt r0 currentStrength maxStrength
 select directionV r0 5 -5
 move maxStrength currentStrength
 MoveDishV:
+s db Setting 5
 jal LoadStuff
 add targetV currentV directionV
 s TrackingDish Vertical targetV
+beq currentV 90 Final # Signal is unreachable
+beq currentV 0 Final # Signal is unreachable
 blt currentStrength maxStrength Final # Max Signal Strength find -> finalize current search
 move maxV currentV
 breq currentStrength maxStrength 2
@@ -80,6 +89,7 @@ move maxStrength currentStrength
 yield
 j MoveDishV
 Final:
+s db Setting 6
 move firstSignal 0
 add r0 minOut maxV
 brge maxV minOut 2

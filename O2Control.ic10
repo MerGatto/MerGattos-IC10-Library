@@ -7,62 +7,46 @@
 define FILTRATION -348054045
 
 define MAXPRESSURE 20000
-define O2TARGET 0.25
+define O2TARGET 0.2
 define MINPRESSURE 60
 
-alias dPipeAnalyzer d0
-alias dInVent1 d1
-alias dInVent2 d2
-alias dAtmosSensor d3
+alias dPump d0
 
 alias vPressure r15
 alias vActive r14
 alias vOxygenRatio r13
 alias vAtmosPressure r12
 
-s db Setting 0
 start:
-#loop counter
-l r0 db Setting
-add r0 r0 1
-s db Setting r0
 
-brdns dInVent1 3
-s dInVent1 PressureInternal MAXPRESSURE
-s dInVent1 Mode 1
-brdns dInVent2 3
-s dInVent2 PressureInternal MAXPRESSURE
-s dInVent2 Mode 1
+l r0 db Open
+bnez r0 off
 
 #check o2 ratio in air
-l vOxygenRatio dAtmosSensor RatioOxygen
+l vOxygenRatio db RatioOxygenInput
 sge vActive vOxygenRatio O2TARGET
 beqz vActive off
 
 #check AtmosPressure
-l vAtmosPressure dAtmosSensor Pressure 
+l vAtmosPressure db PressureOutput2
 sge vActive vAtmosPressure MINPRESSURE
 beqz vActive off
 
 #check Pipe Pressure
-l vPressure dPipeAnalyzer Pressure
+l vPressure db PressureOutput
 sle vActive vPressure MAXPRESSURE
 beqz vActive off
 
-brdns dInVent1 2
-s dInVent1 On 1
-brdns dInVent2 2
-s dInVent2 On 1
-sb FILTRATION On 1
+brdns dPump 2
+s dPump On 1
+s db Mode 1
 
 yield
 j start
 
 off:
-brdns dInVent1 2
-s dInVent1 On 0
-brdns dInVent2 2
-s dInVent2 On 0
-sb FILTRATION On 0
+brdns dPump 2
+s dPump On 0
+s db Mode 0
 yield
 j start

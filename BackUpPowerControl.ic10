@@ -33,6 +33,11 @@ add vBatteryMax r0 r1
 
 div vCharge vBatteryChargeAbs vBatteryMax
 s db Setting vCharge
+s db:0 Channel0 vCharge
+s db:1 Channel0 vCharge
+s d0:1 Channel0 vCharge
+s d0:2 Channel0 vCharge
+
 bdseal dDisplay display
 bdseal dMem writeMem
 

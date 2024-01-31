@@ -22,6 +22,9 @@ sge r0 r0 0.05
 l r1 boiler RatioVolatiles
 sge r1 r1 0.1
 and r0 r0 r1
+l r1 boiler Combustion
+seqz r1 r1
+and r0 r0 r1
 s boiler Activate r0
 
 fuelextraction:
