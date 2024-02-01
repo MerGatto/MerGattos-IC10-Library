@@ -14,11 +14,11 @@ move stepv 1
 move steph 1
 
 push 0
-push -1374574351
-push -1077922067
-push 54412100
-push 175935584
-push -470575659
+push HASH("More Ore Less")#-1374574351
+push HASH("Green Futures")#-1077922067
+push HASH("All Alloys")#54412100
+push HASH("Build INC")#175935584
+push HASH("Gas For Less")#-470575659
 
 seek:  # Scan the sky for contacts
 move sp 0
@@ -34,7 +34,7 @@ l r1 dish InterrogationProgress
 slez r1 r1
 and r2 r2 r1
 breqz trader 4
-l r1 dish SignalID
+l r1 dish SignalID # TODO change to type id
 seq r1 r1 trader
 and r2 r2 r1
 bgtz r2 htrack
@@ -111,6 +111,9 @@ add r0 r0 1
 s db Setting r0
 brdns largedish 2
 s largedish On 0
+## TOOD land if landing pad free and trader is requested trader
+# if landingpad free && trader == 0 || trader == type
+# then land (s dish Activate 1?)
 j seek
 
 passover:  #Dish not powerful enough so use big dish
