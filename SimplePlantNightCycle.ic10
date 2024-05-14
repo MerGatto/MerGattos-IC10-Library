@@ -1,22 +1,29 @@
-define NIGHT_TIME_MINUTES 5
-define TOTAL_DAY_MINUTES 20
+define NIGHT_TIME_MINUTES 7
+define DAY_MINUTES 13
 define HYDRO_STATION 1441767298
 define GROW_LIGHT -1758710260
 
-alias vDayTimeSeconds r15
-alias vNightTimeSeconds r14
+alias minuteCounter r15
 
-move vDayTimeSeconds TOTAL_DAY_MINUTES
-sub vDayTimeSeconds vDayTimeSeconds NIGHT_TIME_MINUTES
-mul vDayTimeSeconds vDayTimeSeconds 60
-mul vNightTimeSeconds NIGHT_TIME_MINUTES 60
+move minuteCounter 0
+j daycycle
 
-
-main:
+daycycle:
+s db Setting minuteCounter
 sb HYDRO_STATION On 1
 sb GROW_LIGHT On 1
-sleep vDayTimeSeconds
+sleep 60
+add minuteCounter minuteCounter 1
+blt minuteCounter DAY_MINUTES daycycle
+move minuteCounter 0
+j nightcycle
+
+nightcycle:
+s db Setting minuteCounter
 sb HYDRO_STATION On 0
 sb GROW_LIGHT On 0
-sleep vNightTimeSeconds
-j main
+sleep 60
+add minuteCounter minuteCounter 1
+blt minuteCounter NIGHT_TIME_MINUTES nightcycle
+move minuteCounter 0
+j daycycle

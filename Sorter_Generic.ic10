@@ -1,29 +1,45 @@
 #GENERIC SORTER
 # Sorts the searched item to the right output
 
-define LookupItem HASH("Hay")
+define LookupItem HASH("ItemCoalOre")
 
 alias Sorter d0
 
-s Sorter Mode 2 # Logic mode
+alias instr r15
+alias sortClassInstr r14
+alias sortItemInstr r13
+alias sortSlotClassInstr r12
 
-Main:
-yield
+# setup sort stuff
+move sortClassInstr 3
+sll r0 Equals 8
+or sortClassInstr sortClassInstr r0
+move sortItemInstr 1
+move sortSlotClassInstr 4
+sll r0 Equals 8
+or sortSlotClassInstr sortSlotClassInstr r0
+
+s db Setting 0
+
+#configure sorter
+sleep 4
+clr Sorter
+s Sorter Mode 1 # Any
 s Sorter On 1
-s Sorter Mode 2 # Logic mode
-l r0 Sorter Output
-bne r0 -1 Main # Still busy
-ls r0 Sorter 0 Occupied
-beqz r0 Main # nothing here
-ls r0 Sorter 0 OccupantHash
 
-beq r0 LookupItem True
-j False
+# SortingClass Example
+#sll r0 SortingClass.Ores 16
+#or instr sortClassInstr r0
+#put Sorter 0 instr
 
-False:
-s Sorter Output 0 #Left output
-j Main
+# SlotClass Example
+#sll r0 SlotClass.Ingot 16
+#or instr sortSlotClassInstr r0
+#put Sorter 2 instr
 
-True:
-s Sorter Output 1 #Right output
-j Main
+sll r0 LookupItem 8
+or instr sortItemInstr r0
+put Sorter 3 instr
+
+s db Setting LookupItem
+s db On 0

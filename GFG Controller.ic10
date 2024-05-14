@@ -1,6 +1,6 @@
 # GFG Controller
-# The GFG needs to be placed in the middle of a 2x1x1 BOX
-# with vents placed on the opposite side
+# The GFG needs to be placed in the back of a 3x2x1 BOX
+# with powered vents placed on the opposite side
 # the Acttive Heating Vent needs to be placed inside of the box
 # The Cooling Vent can be placed on either side but 2 lines of code need to be adapted
 # on line 32
@@ -10,7 +10,7 @@
 # if not connected the GFG will run permanently
 
 # Constants
-define cHighCharge 0.9
+define cHighCharge 0.5
 define cLowCharge 0.2
 define cLowPressure 150
 define cHighPressure 160
@@ -34,18 +34,17 @@ loop:
 yield
 s dVentHeat Mode 1
 
-# Mode 1 (IN) if Vent is placed outside of gfg box (Eg on Europa)
-s dVentCool Mode 1
-s dVentCool PressureInternal 1000
-s dVentCool PressureExternal 0
+# Mode 1 (IN) if Active Vent is placed outside of gfg box (Eg on Europa)
+#s dVentCool Mode 1
+#s dVentCool PressureInternal 1000
+#s dVentCool PressureExternal 0
 
-# Mode 0 if Vent is placed inside of GFG Box (EG with a cooling pipeline on other planets)
-#s dVentCool Mode 0
-#s dVentCool PressureExternal cHighPressure
-#s dVentCool PressureInternal 500
+# Mode 0 if a Powered Vent is placed inside of GFG Box (EG with a cooling pipeline on other planets)
+# Cooling Pipeline in this case should have a maximum of 20C
+s dVentCool Mode 0
+s dVentCool PressureExternal cHighPressure
 
 s dVentHeat PressureExternal 0
-s dVentHeat PressureInternal 50000
 
 l vTemp dGasSensor Temperature
 l vPressure dGasSensor Pressure
@@ -55,6 +54,10 @@ or r0 r1 r0
 
 s dVentCool On r0
 sgt r0 vPressure cHighPressure
+sgt r1 vPressure cLowPressure
+sgt r2 vTemp 293 # greater than 20C
+or r1 r1 r2
+or r0 r0 r1
 s dVentHeat On r0
 
 # if no ChargeReader is set we let the gfg run permanently

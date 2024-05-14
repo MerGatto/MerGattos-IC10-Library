@@ -20,105 +20,91 @@ define COPPERORE -707307845
 define SILVERORE -916518678
 define COBALTORE -983091249
 define URANIUMORE -1516581844
-define VOLATILESICE 1253102035
-define OXITEICE -1805394113
-define WATERICE 1217489948
 define STACKER -2020231820
 define STACKER_REVERSE 1585641623
 
 alias itemClass r12
 alias itemHash r11
 alias occupied r10
+alias instr r9
+alias sortClassInstr r8
+alias sortItemInstr r7
 
+s db Setting 0
+sleep 3
+
+sb STACKER On 1
+sb STACKER Setting 500
+
+sb STACKER_REVERSE On 1
+sb STACKER_REVERSE Setting 500
+
+move sortClassInstr 3
+sll r0 Equals 8
+or sortClassInstr sortClassInstr r0
+
+move sortItemInstr 1
 
 Setup:
 move r0 0
 SetupLoop:
 brdns dr0 3
-s dr0 Mode 2 # Logic mode
+s dr0 Mode 1 # Any
 s dr0 On 1
-s dr0 Output -1
+clr dr0
 add r0 r0 1
 beq r0 6 Main
 j SetupLoop
 
 Main:
-yield
-
 bdseal d0 HandleSorter0
 bdseal d1 HandleSorter1
 bdseal d2 HandleSorter2
 bdseal d3 HandleSorter3
 bdseal d4 HandleSorter4
 bdseal d5 HandleSorter5
-j Main
+j End
 
 HandleSorter0: # Manual Input
-move r0 0
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemClass ORECLASS SortMatch
-j SortNoMatch
+sll r0 SortingClass.Ores 16
+or instr sortClassInstr r0
+put d0 0 instr
+
+sll r0 SortingClass.Ices 16
+or instr sortClassInstr r0
+put d0 1 instr
+
+j ra
 
 HandleSorter1: # Ice
-move r0 1
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash WATERICE SortMatch
-beq itemHash OXITEICE SortMatch
-beq itemHash VOLATILESICE SortMatch
-j SortNoMatch
+sll r0 SortingClass.Ices 16
+or instr sortClassInstr r0
+put d1 0 instr
+j ra
 
 HandleSorter2: # Iron
-move r0 2
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash IRONORE SortMatch
-j SortNoMatch
+sll r0 IRONORE 8
+or instr sortItemInstr r0
+put d2 0 instr
+j ra
 
 HandleSorter3: # Coal
-move r0 3
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash COAL SortMatch
-j SortNoMatch
+sll r0 COAL 8
+or instr sortItemInstr r0
+put d3 0 instr
+j ra
 
 HandleSorter4: # Silicon
-move r0 4
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash SILICONORE SortMatch
-j SortNoMatch
+sll r0 SILICONORE 8
+or instr sortItemInstr r0
+put d4 0 instr
+j ra
 
 HandleSorter5: # Nickel
-move r0 5
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash NICKELORE SortMatch
-j SortNoMatch
+sll r0 NICKELORE 8
+or instr sortItemInstr r0
+put d5 0 instr
 
-LoadOccupant:
-ls itemClass dr0 0 Class
-ls itemHash dr0 0 OccupantHash
-ls occupied dr0 0 Occupied
-j ra
-
-SortMatch:
-s dr0 Output 1 #side output
-j ra
-
-SortNoMatch:
-s dr0 Output 0 #straight output
-j ra
+End:
+s db Setting 1
+s db On 0

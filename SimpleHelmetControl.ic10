@@ -27,22 +27,6 @@ l temp db TemperatureExternal
 l xPos db PositionZ
 l yPos db PositionX
 
-#encode position in targetpressure and temp
-move r0 50
-brlt xPos 5 2
-move r0 51
-brgt xPos -5 2
-move r0 49
-s db PressureSetting r0
-
-move r0 293.15
-brlt yPos 5 2
-move r0 294.15
-brgt yPos -5 2
-move r0 292.15
-s db TemperatureSetting r0
-
-
 # pressure checks
 bgt pressure MAXPRESSURE closeHelmet
 ble pressure MINPRESSURE closeHelmet

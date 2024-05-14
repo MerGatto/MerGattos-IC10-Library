@@ -4,6 +4,7 @@
 # https://steamcommunity.com/sharedfiles/filedetails/?id=2520701196
 
 define DIAL 554524804
+define MEMORY HASH("StructureLogicMemory")
 start:
 yield
 lb sp DIAL Setting Average
@@ -11,11 +12,11 @@ s db Setting sp
 mul sp sp 9
 add sp sp 9
 pop r0
-s d3 Setting r0
+sbn MEMORY HASH("m3") Setting r0
 pop r0
-s d2 Setting r0
+sbn MEMORY HASH("m2") Setting r0
 pop r0
-s d1 Setting r0
+sbn MEMORY HASH("m1") Setting r0
 pop r0
-s d0 Setting r0
+sbn MEMORY HASH("m0") Setting r0
 j start

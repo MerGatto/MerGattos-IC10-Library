@@ -1,5 +1,4 @@
 #AdvancedSorter Part2
-
 alias LeadSorter d0
 alias GoldSorter d1
 alias CopperSorter d2
@@ -20,105 +19,82 @@ define COPPERORE -707307845
 define SILVERORE -916518678
 define COBALTORE -983091249
 define URANIUMORE -1516581844
-define VOLATILESICE 1253102035
-define OXITEICE -1805394113
-define WATERICE 1217489948
 define STACKER -2020231820
 define STACKER_REVERSE 1585641623
 
 alias itemClass r12
 alias itemHash r11
 alias occupied r10
+alias output r9
+alias instr r9
+alias sortClassInstr r8
+alias sortItemInstr r7
 
+s db Setting 0
+sleep 3
+
+move sortClassInstr 3
+sll r0 Equals 8
+or sortClassInstr sortClassInstr r0
+
+move sortItemInstr 1
 
 Setup:
-sb STACKER On 1
-sb STACKER Setting 500
 move r0 0
 SetupLoop:
 brdns dr0 3
-s dr0 Mode 2 # Logic mode
+s dr0 Mode 1 # Any
 s dr0 On 1
-s dr0 Output -1
+clr dr0
 add r0 r0 1
 beq r0 6 Main
 j SetupLoop
 
 Main:
-yield
-
 bdseal d0 HandleSorter0
 bdseal d1 HandleSorter1
 bdseal d2 HandleSorter2
 bdseal d3 HandleSorter3
 bdseal d4 HandleSorter4
 bdseal d5 HandleSorter5
-j Main
+j End
 
 HandleSorter0: # Lead
-move r0 0
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash LEADORE SortMatch
-j SortNoMatch
+sll r0 LEADORE 8
+or instr sortItemInstr r0
+put d0 0 instr
+j ra
 
 HandleSorter1: # Gold
-move r0 1
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash GOLDORE SortMatch
-j SortNoMatch
+sll r0 GOLDORE 8
+or instr sortItemInstr r0
+put d1 0 instr
+j ra
 
 HandleSorter2: # Copper
-move r0 2
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash COPPERORE SortMatch
-j SortNoMatch
+sll r0 COPPERORE 8
+or instr sortItemInstr r0
+put d2 0 instr
+j ra
 
 HandleSorter3: # Silver
-move r0 3
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash SILVERORE SortMatch
-j SortNoMatch
+sll r0 SILVERORE 8
+or instr sortItemInstr r0
+put d3 0 instr
+j ra
 
 HandleSorter4: # Cobalt
-move r0 4
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash COBALTORE SortMatch
-j SortNoMatch
+sll r0 COBALTORE 8
+or instr sortItemInstr r0
+put d4 0 instr
+j ra
 
 HandleSorter5: # Uranium
-move r0 5
-push ra
-jal LoadOccupant
-pop ra
-beqz occupied ra
-beq itemHash URANIUMORE SortMatch
-j SortNoMatch
-
-LoadOccupant:
-ls itemClass dr0 0 Class
-ls itemHash dr0 0 OccupantHash
-ls occupied dr0 0 Occupied
+sll r0 URANIUMORE 8
+or instr sortItemInstr r0
+put d5 0 instr
 j ra
 
-SortMatch:
-s dr0 Output 1 #side output
-j ra
-
-SortNoMatch:
-s dr0 Output 0 #straight output
-j ra
+End:
+s db Setting 1
+s db On 0

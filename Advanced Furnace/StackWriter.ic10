@@ -9,7 +9,7 @@
 # 7 - Ingredient Hash 2
 # 8 - Ingredient Hash 3
 # 9 - Ingredient Hash 4
-
+clr db
 push 1
 push 905
 push 10000
@@ -110,4 +110,5 @@ push -916518678
 push 1830218956
 push -983091249
 
-s db Setting 69
+l r0 db LineNumber
+s db Setting r0

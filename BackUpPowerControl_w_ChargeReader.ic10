@@ -1,0 +1,35 @@
+# Constants
+# Reads the Charge Percentage from a memory
+# Activates a Backup Generator when the Power falls too low
+
+define cHighCharge 0.90
+define cLowCharge 0.50
+
+# Device aliases
+alias dGenerator d0
+alias dChargeReader d1
+
+# variables
+alias vActivated r15
+alias vCharge r14
+
+main:
+l vCharge dChargeReader Setting
+
+bdns dGenerator main
+# activate chec
+bge vCharge cHighCharge deactivate
+ble vCharge cLowCharge activate
+
+yield
+j main
+
+activate:
+s dGenerator On 1
+yield
+j main
+
+deactivate:
+s dGenerator On 0
+yield
+j main

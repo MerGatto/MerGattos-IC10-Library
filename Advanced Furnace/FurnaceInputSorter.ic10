@@ -3,33 +3,45 @@
 # and a Main Input Switch for the Furnace
 
 alias Sorter d0
-
-define ORECLASS 10
-define INGOTClASS 19
 define BIOMASS -831480639
 
-alias itemClass r0
-alias itemHash r1
+alias instr r15
+alias sortClassInstr r14
+alias sortItemInstr r13
+alias sortSlotClassInstr r12
 
+# setup sort stuff
+move sortClassInstr 3
+sll r0 Equals 8
+or sortClassInstr sortClassInstr r0
+move sortItemInstr 1
+move sortSlotClassInstr 4
+sll r0 Equals 8
+or sortSlotClassInstr sortSlotClassInstr r0
 
-main:
-yield
-s Sorter Mode 2 # Logic mode
-ls itemClass Sorter 0 Class
-ls itemHash Sorter 0 OccupantHash
-ls r1 Sorter 0 Occupied
-s db Setting r1
-beqz occupied main
+s db Setting 0
 
+#configure sorter
+sleep 4
+clr Sorter
+s Sorter Mode 1 # Any
+s Sorter On 1
 
-beq itemClass ORECLASS True
-beq itemClass INGOTClASS True
-beq itemHash BIOMASS True
+sll r0 SortingClass.Ores 16
+or instr sortClassInstr r0
+put Sorter 0 instr
 
+sll r0 SortingClass.Ices 16
+or instr sortClassInstr r0
+put Sorter 1 instr
 
-s d0 Output 0 #Left output
-j main
+sll r0 SlotClass.Ingot 16
+or instr sortSlotClassInstr r0
+put Sorter 2 instr
 
-True:
-s d0 Output 1 #Right output
-j main
+sll r0 BIOMASS 8
+or instr sortItemInstr r0
+put Sorter 3 instr
+
+s db Setting 1
+s db On 0
