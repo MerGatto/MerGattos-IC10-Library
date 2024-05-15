@@ -12,7 +12,7 @@
 # Constants
 define cHighCharge 0.5
 define cLowCharge 0.2
-define cLowPressure 150
+define cLowPressure 20
 define cHighPressure 160
 define cMinTemp 290
 
@@ -35,14 +35,14 @@ yield
 s dVentHeat Mode 1
 
 # Mode 1 (IN) if Active Vent is placed outside of gfg box (Eg on Europa)
-#s dVentCool Mode 1
+s dVentCool Mode 1
 #s dVentCool PressureInternal 1000
-#s dVentCool PressureExternal 0
+s dVentCool PressureExternal 0
 
 # Mode 0 if a Powered Vent is placed inside of GFG Box (EG with a cooling pipeline on other planets)
 # Cooling Pipeline in this case should have a maximum of 20C
-s dVentCool Mode 0
-s dVentCool PressureExternal cHighPressure
+#s dVentCool Mode 0
+#s dVentCool PressureExternal cHighPressure
 
 s dVentHeat PressureExternal 0
 
@@ -51,12 +51,10 @@ l vPressure dGasSensor Pressure
 slt r1 vPressure cLowPressure
 sgt r0 vTemp cMinTemp
 or r0 r1 r0
-
 s dVentCool On r0
+
 sgt r0 vPressure cHighPressure
-sgt r1 vPressure cLowPressure
-sgt r2 vTemp 293 # greater than 20C
-or r1 r1 r2
+sgt r1 vTemp 293 # greater than 20C
 or r0 r0 r1
 s dVentHeat On r0
 
@@ -64,6 +62,7 @@ s dVentHeat On r0
 bdns dChargeReader activate
 
 l vCharge dChargeReader Setting
+s db Setting vCharge
 
 # activate check
 
