@@ -1,4 +1,4 @@
-# Defines in which direction (on the compass) the solarpanel port is looking
+# Defines in which direction (on the compass) the solarpanel(power) port is looking
 define CONFIG_PanelPortAngle 180
 # Defines in which direction (on the compass) the daylight sensor data port is looking
 define CONFIG_SensorPortAngle 180

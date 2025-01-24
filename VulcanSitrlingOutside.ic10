@@ -1,20 +1,39 @@
 # VULCAN Stirling Engine Control
 # Turns off at night
-define ENGINE -260316435
+define ENGINE HASH("StructureStirlingEngine")
 
 define MAXTEMP 470 # 200C
+define cHighCharge 0.9
+define cLowCharge 0.5
 
 alias dAtmosSensor d0
+alias dChargeReader d1
 alias vAtmosTemp r13
 
-start:
+main:
+yield
 l vAtmosTemp dAtmosSensor Temperature
-bgt vAtmosTemp MAXTEMP Idling
+bgt vAtmosTemp MAXTEMP deactivate
+
+brdns dChargeReader activate
+l r0 dChargeReader Setting
+# activate chec
+bge r0 cHighCharge deactivate
+ble r0 cLowCharge activate
+
+yield
+j main
+
+activate:
 sb ENGINE On 1
 yield
-j start
+j main
 
-Idling:
+deactivate:
 sb ENGINE On 0
 yield
-j start
+j main
+
+Decision:
+sb ENGINE On r0
+j main

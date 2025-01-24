@@ -1,4 +1,4 @@
-alias TrackingDish d5
+alias TrackingDish d0
 define searchHStep 5
 alias maxStrength r15
 alias currentStrength r14
@@ -20,12 +20,12 @@ move r0 0
 setupLoop:
 push 0
 add r0 r0 1
-blt r0 64 setupLoop
+blt r0 8 setupLoop
 move track 0
 s db Setting track
 move maxStrength 0
 move searchV 35
-s TrackingDish Vertical 45
+s TrackingDish Vertical 60
 sleep 2
 jal LoadStuff
 move firstSignal currentSignal
@@ -45,6 +45,7 @@ jal CheckListForSignal
 move maxStrength currentStrength
 move minOut currentH
 s TrackingDish Vertical currentV
+
 MoveDishH:
 s db Setting 2
 yield
@@ -57,6 +58,7 @@ breq currentStrength maxStrength 2
 move minOut currentH
 move maxStrength currentStrength
 j MoveDishH
+
 GetDirectionV:
 s db Setting 3
 add r0 minOut maxH
@@ -74,6 +76,7 @@ jal LoadStuff
 sgt r0 currentStrength maxStrength
 select directionV r0 5 -5
 move maxStrength currentStrength
+
 MoveDishV:
 s db Setting 5
 jal LoadStuff
@@ -88,6 +91,7 @@ move minOut currentV
 move maxStrength currentStrength
 yield
 j MoveDishV
+
 Final:
 s db Setting 6
 move firstSignal 0
@@ -100,20 +104,22 @@ s dr3 Vertical maxV
 move sp track
 push currentSignal
 add track track 1
-mod track track 5
+mod track track 8
 s db Setting track
 j Search
+
 LoadStuff:
 l currentH TrackingDish Horizontal
 l currentV TrackingDish Vertical
 l currentStrength TrackingDish SignalStrength
 l currentSignal TrackingDish SignalID
 j ra
+
 CheckListForSignal:
 move sp 1
-LoopList: # loop 1 to 5
+LoopList: # loop 1 to 8
 peek r0
 beq currentSignal r0 Search
 add sp sp 1
-bne sp 6 LoopList
+bne sp 8 LoopList
 j ra

@@ -2,8 +2,8 @@
 # Includes a sorter that discards items not fitted for the furnace to the left slot
 # and a Main Input Switch for the Furnace
 
-alias Sorter d0
-define BIOMASS -831480639
+alias InputSorter d0
+alias OutputSorter d1
 
 alias instr r15
 alias sortClassInstr r14
@@ -22,26 +22,36 @@ or sortSlotClassInstr sortSlotClassInstr r0
 s db Setting 0
 
 #configure sorter
-sleep 4
-clr Sorter
-s Sorter Mode 1 # Any
-s Sorter On 1
+sleep 2
+clr InputSorter
+s InputSorter Mode 1 # Any
+s InputSorter On 1
+
+brdns OutputSorter 4
+clr OutputSorter
+s OutputSorter Mode 1 # Any
+s OutputSorter On 1
 
 sll r0 SortingClass.Ores 16
 or instr sortClassInstr r0
-put Sorter 0 instr
+put InputSorter 0 instr
 
 sll r0 SortingClass.Ices 16
 or instr sortClassInstr r0
-put Sorter 1 instr
+put InputSorter 1 instr
 
 sll r0 SlotClass.Ingot 16
 or instr sortSlotClassInstr r0
-put Sorter 2 instr
+put InputSorter 2 instr
 
-sll r0 BIOMASS 8
+sll r0 HASH("ItemBiomass") 8
 or instr sortItemInstr r0
-put Sorter 3 instr
+put InputSorter 3 instr
+
+brdns OutputSorter 4
+sll r0 HASH("ItemReagentMix") 8
+or instr sortItemInstr r0
+put OutputSorter 0 instr
 
 s db Setting 1
 s db On 0

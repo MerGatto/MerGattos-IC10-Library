@@ -4,11 +4,9 @@
 # - a O2 ratio of 25% is reached
 # - O2 Pipe reaches maximum Pressure
 
-define FILTRATION -348054045
-
-define MAXPRESSURE 20000
+define MAXPRESSURE 40000
 define O2TARGET 0.2
-define MINPRESSURE 60
+define MINPRESSURE 50
 
 alias dPump d0
 

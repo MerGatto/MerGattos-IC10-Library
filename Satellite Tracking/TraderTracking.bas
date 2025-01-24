@@ -1,102 +1,87 @@
 ##Meta: AddMipsWrapper = clr,0
 ##Meta:UsePutGetStackCommands=true
-
 clr()
 ALIAS trackingDish Pin0
 #ALIAS passoverDish Pin1
 
 ARRAY knownTraders[8]
 
-var searchHDirection
 var maxStrength
 var stackPointer
 var maxH 
 var maxV
-var vDirection
+var trackDirection
 var currentH = trackingDish.Horizontal
 var currentV
 var currentStrength
 var currentSignal
-vaR waited
-
+var currentProgress
+var startV = 60
 
 
 Main:
     trackingDish.BestContactFilter = -1
-    WaitForSignal(currentH, 75, 0)
-    IF trackingDish.InterrogationProgress == 1 THEN    
+    RepositionDish(currentH, startV, 0)
+    IF currentProgress == 1 THEN
         GOTO KnownTrader
     ENDIF
-    FOR i = 0 TO 7
-        IF knownTraders[i] == currentSignal THEN
+    FOREACH trader IN knownTraders
+        IF trader == currentSignal THEN
             GOTO KnownTrader
         ENDIF
     NEXT
     #UnknownTrader
         trackingDish.BestContactFilter = currentSignal
-        maxH = currentH
         GOTO TrackTrader
     KnownTrader:
-        currentH = currentH + 10
+        currentH = currentH + 5
         goto Main
 
 TrackTrader:
     #GetDirectionH
-    WaitForSignal(currentH, currentV, 60)
-    maxStrength = currentStrength
+    maxStrength = -1
+    RepositionDish(currentH, currentV, 60)
     if maxStrength == -1 then
-        currentH = currentH + 54
+        currentH = currentH + 27
         GOTO TrackTrader
     endif
-    currentH = currentH + 2
-    WaitForSignal(currentH, currentV, waited)
-    searchHDirection = -5
-    if currentStrength > maxStrength then
-        searchHDirection = 5
-        maxStrength = currentStrength
-        maxH = currentH
-    endif
-    WaitH:
-    currentH = currentH + searchHDirection
-    WaitForSignal(currentH, currentV, 60)
-    if (currentStrength > maxStrength) THEN
-        maxStrength = currentStrength
-        maxH = currentH
-        goto WaitH
+    # GetDirectionH
+    trackDirection = 3
+    currentH = currentH + 1
+    RepositionDish(currentH, currentV, 60)
+    TrackH:
+    currentH = currentH + trackDirection
+    RepositionDish(currentH, currentV, 60)
+    if (currentStrength >= maxStrength) THEN
+        goto TrackH
      endif
      # MaxHFound
     GetDirectionV:
-    WaitForSignal(maxH, 77, 30)
-    maxV = currentV
-    IF currentStrength > maxStrength THEN
-        vDirection = 5
-        maxStrength = currentStrength
-        maxV = currentV
-    ELSE
-        vDirection = -5
-    ENDIF
+    trackDirection = 3
+    currentV = currentV + 1
+    RepositionDish(maxH, currentV, 30)
     TrackV:
-    currentV = currentV + vDirection
-    WaitForSignal(currentH, currentV, 30)
-    if (currentStrength > maxStrength) THEN
-        maxStrength = currentStrength
-        maxV = currentV
+    currentV = currentV + trackDirection
+    RepositionDish(currentH, currentV, 30)
+    if (currentStrength >= maxStrength) THEN
         goto TrackV
     endif
     MaxVFound:
-    WaitForSignal(maxH, maxV, true)
+    RepositionDish(maxH, maxV, 30)
     knownTraders[stackPointer] = currentSignal
     stackPointer++
     stackPointer = mod(stackPointer, 10)
+    if currentStrength < trackingDish.MinimumWattsToContact then goto Main endif
     trackingDish.Activate = false
     wait(1)
-    while trackingDish.InterrogationProgress < 1
+    while (currentProgress < 1) && (currentProgress >= 0)
         trackingDish.Activate = true
-        wait(1)
+        currentProgress = trackingDish.InterrogationProgress
+        yield()
     endwhile
 goto Main
 
-FUNCTION WaitForSignal(targetH, targetV, yieldTime)
+FUNCTION RepositionDish(targetH, targetV, yieldTime)
     trackingDish.Vertical = targetV
     trackingDish.Horizontal = targetH
     WaitForSignalStart:
@@ -107,12 +92,25 @@ FUNCTION WaitForSignal(targetH, targetV, yieldTime)
     currentH = trackingDish.Horizontal
     currentV = trackingDish.Vertical
     currentSignal = trackingDish.SignalID
+    currentProgress = trackingDish.InterrogationProgress
     FOR j = 0 TO yieldTime
+        if currentSignal == -1 then
+            goto Main
+        endif
         IC.Setting = j
         currentStrength = trackingDish.WattsReachingContact
-        if currentStrength > 0 then
-            break
-        ENDIF 
+        if currentStrength > 0 then            
+            IF currentStrength >= maxStrength THEN
+                maxStrength = currentStrength
+                maxH = currentH
+                maxV = currentV
+            ELSE
+                trackDirection = trackDirection * -1
+            ENDIF
+            RETURN j
+        else
+            trackDirection = trackDirection * -1
+        ENDIF
         yield()
     NEXT
     RETURN j

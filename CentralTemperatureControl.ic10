@@ -6,12 +6,12 @@
 alias targetPipe d0
 alias coolValve d1
 alias heatValve d2
-alias intakePump d3
-alias targetTempMemory d4
-alias coolantSensor d5
+alias heatPump d3
+alias heatSensor d4
+alias targetTempMemory d5
 
-define MAXPRESSURE 10000
-define DEFAULTTEMP 295
+define MAXPRESSURE 40000
+define DEFAULTTEMP 300
 define TEMPTOLERANCE 2
 
 alias vTargetTemp r15
@@ -21,7 +21,10 @@ alias vHighTemp r12
 
 start:
 #check Pressure
-bdseal intakePump pressureCheck
+sb HASH("StructureBackPressureRegulator") Setting 45000
+sb HASH("StructureBackPressureRegulator") On 1
+
+bdseal heatPump pressureCheck
 
 #check Temp Setting
 move vTargetTemp DEFAULTTEMP
@@ -30,50 +33,33 @@ s db Setting vTargetTemp
 add vHighTemp vTargetTemp TEMPTOLERANCE
 sub vLowTemp vTargetTemp TEMPTOLERANCE
 
-l r0 targetPipe PrefabHash
-brne r0 HASH("StructurePipeAnalysizer") 2
-s targetPipe On 1
-l r0 targetPipe PrefabHash
-brne r0 HASH("StructureLiquidPipeAnalyzer") 2
-s targetPipe On 1
-
 #check cold temp
 l r0 targetPipe Temperature
-bgtal r0 vHighTemp hot
+sgt r0 r0 vHighTemp
+brdns coolValve 2
+s coolValve On r0
 
 #check hot temp
 l r0 targetPipe Temperature
-bltal r0 vLowTemp cold
+slt r0 r0 vLowTemp
+brdns heatValve 2
+s heatValve On r0
 
 yield
 j start
 
 pressureCheck:
+bdns heatSensor ra
 #PipePressure
-l vPressure targetPipe Pressure
-slt r0 vPressure MAXPRESSURE
-s intakePump On r0
+l r0 heatSensor Pressure
+slt r0 r0 MAXPRESSURE
+l r1 heatSensor Temperature
+slt r1 r1 800
+or r0 r0 r1
+s heatPump On r0
 j ra
 
 memoryCheck:
 l vTargetTemp targetTempMemory Setting
 add vTargetTemp vTargetTemp 273
-j ra
-
-hot:
-brdns heatValve 2
-s heatValve On 0
-move r0 1
-brdns coolantSensor 3
-l r0 coolantSensor Temperature
-slt r0 r0 vTargetTemp
-brdns coolValve 2
-s coolValve On r0
-j ra
-
-cold:
-brdns heatValve 2
-s heatValve On 1
-brdns coolValve 2
-s coolValve On 0
 j ra

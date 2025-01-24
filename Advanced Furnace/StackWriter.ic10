@@ -10,11 +10,11 @@
 # 8 - Ingredient Hash 3
 # 9 - Ingredient Hash 4
 clr db
-push 1
-push 905
+push 15011598
+push 2000
 push 10000
-push 2005
-push 20000
+push 10000
+push 40000
 push 0
 push 0
 push 0
@@ -112,3 +112,4 @@ push -983091249
 
 l r0 db LineNumber
 s db Setting r0
+s db On 0

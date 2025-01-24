@@ -1,19 +1,44 @@
 # Controls the connected Device to turn on or off when a certain Threshold is met
 
 define THRESHOLD 20000
-alias vPressure r15
+define TEMPERATURE 300
+alias WastePump d0
+alias coolingSwitch d1
+
+alias inputPressure r15
+alias outputPressure r14
+alias temp r13
 
 main:
 yield
-l vPressure db PressureOutput
-#l vPressure db PressureInput
 
-# Turn On when Pipe Pressure exceeds Threshold
-#sgt r0 vPressure THRESHOLD 
+l r0 db Open
+bnez r0 IsOpen
 
-# Turn On when Pipe Pressure is less than Threshold
-slt r0 vPressure THRESHOLD 
+l inputPressure db PressureInput
+l outputPressure db PressureOutput
+l temp db TemperatureOutput
+
+
+slt r0 outputPressure THRESHOLD
+add r1 TEMPERATURE 10
+slt r1 temp r1
+sgt r2 temp TEMPERATURE
+
+brdns coolingSwitch 3
+s coolingSwitch On r2
+and r0 r0 r1
 
 s db Mode r0
+brdns WastePump 2
+s WastePump On r0
 
+j main
+
+IsOpen:
+brdns WastePump 2
+s WastePump On 0
+brdns coolingSwitch 2
+s coolingSwitch On 0
+s db Mode 0
 j main

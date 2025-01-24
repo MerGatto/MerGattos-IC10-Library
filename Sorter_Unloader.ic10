@@ -1,7 +1,7 @@
 #GENERIC SORTER
 # Sorts the searched item to the right output
 
-define LookupItem HASH("ItemCoalOre")
+# define LookupItem HASH("ItemCoalOre")
 
 alias Sorter d0
 
@@ -29,22 +29,16 @@ clr Sorter
 s Sorter Mode 1 # Any
 s Sorter On 1
 
-# SortingClass Example
-#sll r0 SortingClass.Ores 16
-#or instr sortClassInstr r0
-#put Sorter index instr
-#add index index 1
-
 # SlotClass Example
-#sll r0 SlotClass.Ingot 16
-#or instr sortSlotClassInstr r0
-#put Sorter index instr
-#add index index 1
-
-sll r0 LookupItem 8
-or instr sortItemInstr r0
+sll r0 SlotClass.Back 16
+or instr sortSlotClassInstr r0
 put Sorter index instr
 add index index 1
 
-s db Setting LookupItem
+sll r0 SlotClass.Belt 16
+or instr sortSlotClassInstr r0
+put Sorter index instr
+add index index 1
+
+s db Setting index
 s db On 0

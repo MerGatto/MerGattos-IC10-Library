@@ -1,5 +1,4 @@
-#define MAXPRESSURE 40000
-define MAXTEMP 420
+define MAXTEMP 245
 
 alias dVent d0
 alias dAtmosSensor d1
@@ -12,17 +11,13 @@ s db Setting 0
 start:
 yield
 
-#s dVent PressureInternal MAXPRESSURE
 s dVent Mode 1
-
 # Check if Night or Daytime
 l vAtmosTemp dAtmosSensor Temperature
 bgt vAtmosTemp MAXTEMP Daytime
 
 Nighttime:
 s dVent On 1
-
-
 j start
 
 Daytime:

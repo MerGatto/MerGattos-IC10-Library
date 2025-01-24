@@ -5,7 +5,7 @@ alias jetpack d1
 define MINPRESSURE 70
 define MAXPRESSURE 200
 define MAXTEMP 318 # 45c
-define MINTEMP 283 # 10c
+define MINTEMP 288 # 15c
 
 alias pressure r15
 alias temp r14

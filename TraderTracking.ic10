@@ -3,7 +3,7 @@
 alias dish d0   # Small, medium or large dish
 alias light d1  # LED
 alias largedish d2 # Optional
-alias dial d3   # Optional for eTrade (mod required)
+alias dial d3   # Optional Requesting specific trader, see hashes below
 alias stepv r5
 alias steph r6
 alias oldstrength r7
@@ -12,14 +12,17 @@ alias newv r9
 alias trader r10
 move stepv 1
 move steph 1
-
-push 0
-push HASH("More Ore Less")#-1374574351
-push HASH("Green Futures")#-1077922067
-push HASH("All Alloys")#54412100
-push HASH("Build INC")#175935584
-push HASH("Gas For Less")#-470575659
-
+push 0 # ANY Trader
+push HASH("OreTrader") # 1
+push HASH("AlloyTrader") # 2
+push HASH("FoodTrader") # 3
+push HASH("HydroponicsTrader") # 4
+push HASH("GasTrader") # 5
+push HASH("LiquidTrader") # 6
+push HASH("HardwareTrader") # 7
+push HASH("ApplianceTrader") # 8
+push HASH("ConsumablesTrader") # 9
+push HASH("Construction Trader") # 10
 seek:  # Scan the sky for contacts
 move sp 0
 brdns dial 2
@@ -34,7 +37,7 @@ l r1 dish InterrogationProgress
 slez r1 r1
 and r2 r2 r1
 breqz trader 4
-l r1 dish SignalID # TODO change to type id
+l r1 dish ContactTypeId
 seq r1 r1 trader
 and r2 r2 r1
 bgtz r2 htrack

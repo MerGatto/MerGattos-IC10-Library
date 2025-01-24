@@ -13,11 +13,11 @@
 define cHighCharge 0.5
 define cLowCharge 0.2
 define cLowPressure 20
-define cHighPressure 160
+define cHighPressure 40
 define cMinTemp 290
 
 # Device aliases
-alias dGenerator d0
+#alias dGenerator d0
 alias dVentHeat d1
 alias dVentCool d2
 alias dGasSensor d3
@@ -36,10 +36,8 @@ s dVentHeat Mode 1
 
 # Mode 1 (IN) if Active Vent is placed outside of gfg box (Eg on Europa)
 s dVentCool Mode 1
-#s dVentCool PressureInternal 1000
-s dVentCool PressureExternal 0
 
-# Mode 0 if a Powered Vent is placed inside of GFG Box (EG with a cooling pipeline on other planets)
+# Mode 0 if a Powered Vent is placed inside of GFG Box (EG with a cooling pipeline on hot planets)
 # Cooling Pipeline in this case should have a maximum of 20C
 #s dVentCool Mode 0
 #s dVentCool PressureExternal cHighPressure
@@ -51,12 +49,18 @@ l vPressure dGasSensor Pressure
 slt r1 vPressure cLowPressure
 sgt r0 vTemp cMinTemp
 or r0 r1 r0
+sgt r1 vPressure cHighPressure
+seq r1 r1 0
+and r0 r0 r1
 s dVentCool On r0
 
 sgt r0 vPressure cHighPressure
 sgt r1 vTemp 293 # greater than 20C
 or r0 r0 r1
 s dVentHeat On r0
+
+#deactivate when atmosphere too hot
+bgt vTemp 323 deactivate
 
 # if no ChargeReader is set we let the gfg run permanently
 bdns dChargeReader activate
@@ -73,9 +77,9 @@ yield
 j loop
 
 activate:
-s dGenerator On 1
+sb HASH("StructureGasGenerator") On 1
 j loop
 
 deactivate:
-s dGenerator On 0
+sb HASH("StructureGasGenerator") On 0
 j loop

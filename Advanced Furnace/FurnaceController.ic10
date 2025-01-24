@@ -26,92 +26,98 @@ alias targetpress r4
 
 start:
 yield
-	#load data
-	sb FURNACE SettingInput 100
-	sb FURNACE On 1
-	lb sp DIAL Setting Average
-	mul sp sp 9
-	add sp sp 5
-	pop maxpress
-	pop minpress
-	pop maxtemp
-	pop mintemp
-	pop ingothash
-	s db Setting ingothash
-	l r0 manualSwitch Setting
-	bnez r0 start
-	l r0 mainInputControl Setting
-	s coldpump On r0
-	s hotpump On r0	
-	sb FURNACE SettingOutput 0
-	s hotpump Setting 0
-	s coldpump Setting 0
-	beqz r0 start
-	# Check pressure and temp in alloy zone
-	lb r0 FURNACE Pressure 0
-	bgt r0 maxpress makeadjustment
-	blt r0 minpress makeadjustment
-	lb r0 FURNACE  Temperature 0
-	bgt r0 maxtemp makeadjustment
-	blt r0 mintemp makeadjustment
-	j start
+ #load data
+ sb FURNACE SettingInput 100
+ sb FURNACE On 1
+ lb sp DIAL Setting Average
+ mul sp sp 9
+ add sp sp 5
+ pop maxpress
+ pop minpress
+ pop maxtemp
+ pop mintemp
+ pop ingothash
+ s db Setting ingothash
+ lb r0 FURNACE Reagents Maximum
+ sb HASH("StructureDiode") On 1
+ brgt r0 0 3
+ sb HASH("StructureDiode") Color 2 #green
+ jr 2
+ sb HASH("StructureDiode") Color 4 #red
+ l r0 manualSwitch Setting
+ bnez r0 start
+ l r0 mainInputControl Setting
+ s coldpump On r0
+ s hotpump On r0
+ sb FURNACE SettingOutput 0
+ s hotpump Setting 0
+ s coldpump Setting 0
+ beqz r0 start
+ # Check pressure and temp in alloy zone
+ lb r0 FURNACE Pressure 0
+ bgt r0 maxpress makeadjustment
+ blt r0 minpress makeadjustment
+ lb r0 FURNACE  Temperature 0
+ bgt r0 maxtemp makeadjustment
+ blt r0 mintemp makeadjustment
+ j start
 makeadjustment:
-	#find input gas temp
-	lb r0 FURNACE TotalMoles 0
-	max r0 r0 0.1
-	lb r1 FURNACE Pressure 0
-	max r1 r1 0.1
-	lb r2 FURNACE Temperature 0
-	max r2 r2 0.1
-	div inputtemp r0 r1
-	mul inputtemp inputtemp r2
-	min targetpress maxpress 60000
-	add targetpress minpress targetpress
-	div targetpress targetpress 2	
-	mul inputtemp inputtemp targetpress #target energy
-	l targettemp hotsensor Temperature
-	min targettemp maxtemp targettemp
-	add targettemp targettemp mintemp
-	div targettemp targettemp 2
-	div inputmoles inputtemp targettemp #target moles
-	sub inputmoles inputmoles r0 #moles needed
-	mul r0 r0 r2 #current energy
-	sub inputtemp inputtemp r0 #energy needed
-	div inputtemp inputtemp inputmoles #input temperatur
-	slez r0 inputmoles
-	blez inputmoles reducepressure
-	add inputtemp inputtemp 5
-	#Calculate cold pump settings
-	l r0 hotsensor Temperature
-	sgt r1 inputtemp r0
-	sub coldsetting r0 inputtemp
-	div coldsetting coldsetting r0
-	l r0 coldsensor Pressure
-	div coldsetting coldsetting r0
-	#Calculate hot pump setting
-	l r0 coldsensor Temperature
-	slt r1 inputtemp r0
-	sub hotsetting inputtemp r0
-	div hotsetting hotsetting r0
-	l r0 hotsensor Pressure
-	div hotsetting hotsetting r0
-	#Throttle down foe target pressure
-	lb r0 FURNACE Pressure 0
-	sub r0 targetpress r0
-	div r0 r0 70  #input gain
-	max r0 r0 0
-	min inputspeed r0 50
-	add r0 hotsetting coldsetting
-	div r0 inputspeed r0
-	mul hotsetting hotsetting r0
-	mul coldsetting coldsetting r0
-	#Dump pressure if required
-	#blez coldsetting reducepressure
-	blez hotsetting reducepressure
-	#Activate pumps
-	s coldpump Setting coldsetting
-	s hotpump Setting hotsetting
-	j start
+ #find input gas temp
+ lb r0 FURNACE TotalMoles 0
+ max r0 r0 0.1
+ lb r1 FURNACE Pressure 0
+ max r1 r1 0.1
+ lb r2 FURNACE Temperature 0
+ max r2 r2 0.1
+ div inputtemp r0 r1
+ mul inputtemp inputtemp r2
+ min targetpress maxpress 60000
+ add targetpress minpress targetpress
+ div targetpress targetpress 2
+ mul inputtemp inputtemp targetpress #target energy
+ l targettemp hotsensor Temperature
+ min targettemp maxtemp targettemp
+ add targettemp targettemp mintemp
+ div targettemp targettemp 2
+ div inputmoles inputtemp targettemp #target moles
+ sub inputmoles inputmoles r0 #moles needed
+ mul r0 r0 r2 #current energy
+ sub inputtemp inputtemp r0 #energy needed
+ div inputtemp inputtemp inputmoles #input temperatur
+ slez r0 inputmoles
+ blez inputmoles reducepressure
+ add inputtemp inputtemp 5
+ #Calculate cold pump settings
+ l r0 hotsensor Temperature
+ sgt r1 inputtemp r0
+ sub coldsetting r0 inputtemp
+ div coldsetting coldsetting r0
+ l r0 coldsensor Pressure
+ div coldsetting coldsetting r0
+ #Calculate hot pump setting
+ l r0 coldsensor Temperature
+ slt r1 inputtemp r0
+ sub hotsetting inputtemp r0
+ div hotsetting hotsetting r0
+ l r0 hotsensor Pressure
+ div hotsetting hotsetting r0
+ #Throttle down foe target pressure
+ lb r0 FURNACE Pressure 0
+ sub r0 targetpress r0
+ div r0 r0 70  #input gain
+ max r0 r0 0
+ min inputspeed r0 50
+ add r0 hotsetting coldsetting
+ div r0 inputspeed r0
+ mul hotsetting hotsetting r0
+ mul coldsetting coldsetting r0
+ #Dump pressure if required
+ #blez coldsetting reducepressure
+ blez hotsetting reducepressure
+ #Activate pumps
+ s coldpump Setting coldsetting
+ s hotpump Setting hotsetting
+ j start
 reducepressure:
-	sb FURNACE SettingOutput 50
-	j start
+ sb FURNACE SettingOutput 50
+ j start

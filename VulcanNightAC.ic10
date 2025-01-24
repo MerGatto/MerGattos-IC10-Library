@@ -1,0 +1,39 @@
+define MAXTEMP 420
+
+alias Valve d0
+alias dAtmosSensor d1
+alias coolantSensor d2
+alias atmosVent d3
+
+alias vPressure r15
+alias vActive r14
+alias vAtmosTemp r13
+
+s db Setting 0
+start:
+yield
+
+l r0 coolantSensor VolumeOfLiquid
+seqz r0 r0
+l r1 coolantSensor Temperature
+sgt r1 r1 210
+and r0 r0 r1
+
+sb HASH("StructureAirConditioner") On r0
+sb HASH("StructureAirConditioner") Mode r0
+
+# Check if Night or Daytime
+l vAtmosTemp dAtmosSensor Temperature
+bgt vAtmosTemp MAXTEMP Daytime
+
+Nighttime:
+s Valve On 1
+brdns atmosVent 2
+s atmosVent On 1
+j start
+
+Daytime:
+s Valve On 0
+brdns atmosVent 2
+s atmosVent On 0
+j start

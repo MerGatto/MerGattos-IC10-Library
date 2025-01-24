@@ -4,41 +4,66 @@ alias igniter d2
 alias fuelpump d3
 alias extractorpump d4
 
-define MAXPRESSURE 20000
-define HOTTEMP 2000
-define IGNITETMP 50
+define PIPEANALYZER HASH("StructurePipeAnalysizer")
+define MAXPRESSURE 25000
+define IGNITEPRESSURE 750
+define HOTTEMP 1800
 
-s db Setting 0
-start:
-l r7 db Setting
-add r7 r7 1
-s db Setting r7
-#ignite if ready
-l r0 boilerPA RatioOxygen
-sge r0 r0 0.05
-l r1 boilerPA RatioVolatiles
-sge r1 r1 0.1
+alias boilerpressure r15
+alias boilertemp r14
+alias outputpressure r13
+alias volRatio r12
+alias nosRatio r11
+alias oxyRatio r10
+
+main:
+yield
+s boilerPA On 1
+l boilerpressure boilerPA Pressure
+l boilertemp boilerPA Temperature
+l oxyRatio boilerPA RatioOxygen
+l nosRatio boilerPA RatioNitrousOxide
+l volRatio boilerPA RatioVolatiles
+
+s db Setting boilertemp
+s extractorpump On 0
+
+#fuel pump up to IGNITEPRESSURE
+slt r0 boilerpressure IGNITEPRESSURE
+s fuelpump On r0
+bnez r0 main
+
+#wait for Combustion to finish
+
+# has Oxidizer?
+sgt r0 oxyRatio 0.005
+sgt r1 nosRatio 0.005
+or r0 r0 r1
+
+# has volatiles?
+sgt r1 volRatio 0.005
+
+# is still burning when has oxidizer and vol and combustion is 1
 and r0 r0 r1
 l r1 boilerPA Combustion
-seqz r1 r1
 and r0 r0 r1
-s igniter Activate r0
+bnez r0 main
 
-fuelextraction:
-# turn on extractor
-l r0 boilerPA Temperature
-sge r0 r0 IGNITETMP
-l r1 boilerPA Pressure
-sge r1 r1 500
-and r0 r0 r1
-s extractorpump On r0
-s extractorpump Setting 1000
-#turn on fuel pump but only when extractor is not ru
-nor r0 r0 r0
-l r1 outputPA Pressure
-sle r1 r1 MAXPRESSURE
-and r0 r0 r1
-s fuelpump On r0
+sgt r0 boilertemp HOTTEMP
+bnez r0 extractorloop
+s igniter Activate 1
+j main
 
+extractorloop:
 yield
-j start
+s boilerPA On 1
+l r0 outputPA PrefabHash
+brne r0 PIPEANALYZER 2
+s outputPA On 1
+l boilertemp boilerPA Temperature
+l outputpressure outputPA Pressure
+s db Setting boilertemp
+beqz boilertemp main
+slt r0 outputpressure MAXPRESSURE
+s extractorpump On r0
+j extractorloop

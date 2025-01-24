@@ -1,15 +1,12 @@
 #Water Generation
 #Lets the H2 Combustor run until the Water Pipe reaches max Pressure
-alias H2Combustor d0
-alias H2Analyzer d1
-
-define MAXPRESSURE 20000
+define MAXPRESSURE 40000
 
 main:
-l r0 H2Analyzer Pressure
+l r0 db PressureOutput
 slt r0 r0 MAXPRESSURE
 
-s H2Combustor On r0
+s db Mode r0
 
 yield
 j main

@@ -3,16 +3,13 @@
 # and writes it to the connected display
 # Activates a Backup Generator when the Power falls too low
 
-define cHighCharge 0.50
+define cHighCharge 0.80
 define cLowCharge 0.10
 
 define BATTERYLARGE -1388288459
 define BATTERY -400115994
 
-# Device aliases
-alias dBackupGenerator d0
-alias dDisplay d1
-alias dMem d2
+alias dDisplay d0
 
 # variables
 alias vActivated r15
@@ -35,27 +32,43 @@ div vCharge vBatteryChargeAbs vBatteryMax
 s db Setting vCharge
 s db:0 Channel0 vCharge
 s db:1 Channel0 vCharge
-s d0:1 Channel0 vCharge
-s d0:2 Channel0 vCharge
 
 bdseal dDisplay display
-bdseal dMem writeMem
+brdns d1 2
+s d1 Setting vCharge
+brdns d2 2
+s d2 Setting vCharge
+brdns d3 2
+s d3 Setting vCharge
+brdns d4 2
+s d4 Setting vCharge
+brdns d5 2
+s d5 Setting vCharge
 
-bdns dBackupGenerator main
 # activate chec
 bge vCharge cHighCharge deactivate
 ble vCharge cLowCharge activate
+ble vCharge cHighCharge deactivateHighEnergy
 
 yield
 j main
 
 activate:
-s dBackupGenerator On 1
+sb HASH("StructureSolidFuelGenerator") On 1
+sb HASH("StructureElectrolyzer") On 0
+# activate chec
+bge vCharge cHighCharge deactivate
 yield
 j main
 
 deactivate:
-s dBackupGenerator On 0
+sb HASH("StructureSolidFuelGenerator") On 0
+sb HASH("StructureElectrolyzer") On 1
+yield
+j main
+
+deactivateHighEnergy:
+sb HASH("StructureElectrolyzer") On 0
 yield
 j main
 
@@ -66,21 +79,17 @@ s dDisplay Mode 1
 bgt vCharge 0.99 maxCharge
 bgt vCharge 0.80 highcharge
 bgt vCharge 0.25 mediumcharge
-s dDisplay Color 4
-j ra
-
-writeMem:
-s dMem Setting vCharge
+s d0 Color 4
 j ra
 
 mediumcharge:
-s dDisplay Color 5
+s d0 Color 5
 j ra
 
 highcharge:
-s dDisplay Color 2
+s d0 Color 2
 j ra
 
 maxCharge:
-s dDisplay Color 0
+s d0 Color 0
 j ra

@@ -1,0 +1,42 @@
+# Defines in which direction (on the compass) the daylight sensor data port is looking
+define CONFIG_SensorPortAngle 0
+
+define DaylightSensor 1076425094
+define Sunup 70
+define Sundown 290
+
+define HYDRO_STATION 1441767298
+define GROW_LIGHT -1758710260
+
+alias angle r15
+
+Main:
+yield
+#Horizontal
+lb angle DaylightSensor Horizontal Average
+add angle angle CONFIG_SensorPortAngle
+add angle angle 180
+
+mod angle angle 360
+
+s db Setting angle
+
+blt angle Sunup nightcycle
+bgt angle Sundown nightcycle
+
+daycycle:
+sb HYDRO_STATION On 1
+sb GROW_LIGHT On 1
+j Main
+
+nightcycle:
+sb HYDRO_STATION On 0
+sb GROW_LIGHT On 0
+j Main
+
+
+
+s db Setting angle
+
+yield
+j Main

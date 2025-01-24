@@ -42,7 +42,7 @@ move sortItemInstr 1
 Setup:
 move r0 0
 SetupLoop:
-brdns dr0 3
+brdns dr0 4
 s dr0 Mode 1 # Any
 s dr0 On 1
 clr dr0
