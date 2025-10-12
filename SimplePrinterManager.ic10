@@ -1,9 +1,10 @@
 # Stacker Controlled Printer
-# Uses the setting of the stacker to control the amount to be produces by the connected printer
+# Uses the setting of the stacker to control the amount to be produces by the connected pr
 # Optionaly display a countdown and the current setting on a connected display
 
 # Turns all connected devices of after an amount of ticks (half seconds)
 define TIMEOUT 120
+define DEFAULT_SETTING 500
 
 alias Printer d0
 alias Stacker d1
@@ -33,6 +34,8 @@ move inTimeOut 0
 move timeoutCount 0
 s db Setting timeoutCount
 l setting Stacker Setting
+brnez setting 2
+move setting DEFAULT_SETTING
 brdns Display 2
 s Display Setting setting
 

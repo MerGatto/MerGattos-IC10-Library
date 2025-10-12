@@ -1,6 +1,6 @@
 # Controls the connected Device to turn on or off when a certain Threshold is met
 
-define THRESHOLD 20000
+define THRESHOLD 40000
 define TEMPERATURE 300
 alias WastePump d0
 alias coolingSwitch d1

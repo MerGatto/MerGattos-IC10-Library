@@ -3,13 +3,21 @@
 # and writes it to the connected display
 # Activates a Backup Generator when the Power falls too low
 
-define cHighCharge 0.80
-define cLowCharge 0.10
+define HighCharge 0.80
+define LowCharge 0.10
+
+define BackupPowerDevice HASH("StructureSolidFuelGenerator")
+define HighEnergyDevice HASH("StructureElectrolyzer")
 
 define BATTERYLARGE -1388288459
 define BATTERY -400115994
 
-alias dDisplay d0
+alias chargeDisplay d0
+alias chargeReader d1
+alias lowPowerDevice d2 # eg Generator
+alias highPowerDevice d3 # eg Nitrolyzer
+alias chargeOutput3 d4
+alias chargeOutput4 d5
 
 # variables
 alias vActivated r15
@@ -33,48 +41,52 @@ s db Setting vCharge
 s db:0 Channel0 vCharge
 s db:1 Channel0 vCharge
 
-bdseal dDisplay display
-brdns d1 2
-s d1 Setting vCharge
+bdseal chargeDisplay HandleDisplay
 brdns d2 2
-s d2 Setting vCharge
-brdns d3 2
-s d3 Setting vCharge
-brdns d4 2
 s d4 Setting vCharge
 brdns d5 2
 s d5 Setting vCharge
 
 # activate chec
-bge vCharge cHighCharge deactivate
-ble vCharge cLowCharge activate
-ble vCharge cHighCharge deactivateHighEnergy
+bge vCharge HighCharge deactivate
+ble vCharge LowCharge activate
+ble vCharge HighCharge deactivateHighEnergy
 
 yield
 j main
 
 activate:
-sb HASH("StructureSolidFuelGenerator") On 1
-sb HASH("StructureElectrolyzer") On 0
+sb BackupPowerDevice On 1
+brdns lowPowerDevice 2
+s lowPowerDevice On 1
+sb HighEnergyDevice On 0
+brdns highPowerDevice 2
+s highPowerDevice On 0
 # activate chec
-bge vCharge cHighCharge deactivate
+bge vCharge HighCharge deactivate
 yield
 j main
 
 deactivate:
-sb HASH("StructureSolidFuelGenerator") On 0
-sb HASH("StructureElectrolyzer") On 1
+sb BackupPowerDevice On 0
+brdns lowPowerDevice 2
+s lowPowerDevice On 0
+sb HighEnergyDevice On 1
+brdns highPowerDevice 2
+s highPowerDevice On 1
 yield
 j main
 
 deactivateHighEnergy:
-sb HASH("StructureElectrolyzer") On 0
+sb HighEnergyDevice On 0
+brdns highPowerDevice 2
+s highPowerDevice On 0
 yield
 j main
 
-display:
-s dDisplay Setting vCharge
-s dDisplay Mode 1
+HandleDisplay:
+s chargeDisplay Setting vCharge
+s chargeDisplay Mode 1
 
 bgt vCharge 0.99 maxCharge
 bgt vCharge 0.80 highcharge

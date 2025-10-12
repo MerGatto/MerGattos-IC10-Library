@@ -1,0 +1,46 @@
+# For Single Filtration Unit
+define MAXTEMP 420
+
+alias dVent d0
+alias dAtmosSensor d1
+
+alias vPressure r15
+alias vActive r14
+alias vAtmosTemp r13
+
+start:
+yield
+
+#s dVent PressureInternal MAXPRESSURE
+s dVent Mode 1
+
+l r0 db PressureOutput
+slt r0 r0 40000
+
+# Assume NightTime if atmosSensor is not set
+bdns dAtmosSensor Nighttime
+# Check if Night or Daytime
+l vAtmosTemp dAtmosSensor Temperature
+bgt vAtmosTemp MAXTEMP Daytime
+
+# emergency check
+l r0 db PressureInput
+bgt r0 50000 Emergency
+
+Nighttime:
+l r0 db PressureInput
+slt r0 r0 45000
+s dVent On r0
+j start
+
+Daytime:
+s dVent On 0
+j start
+
+Emergency:
+l r0 db PressureInput
+blt r0 45000 start
+s dVent Mode 0 # Outward
+s dVent On 1
+yield
+j Emergency

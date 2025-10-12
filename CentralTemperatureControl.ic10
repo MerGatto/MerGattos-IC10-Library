@@ -1,7 +1,8 @@
 # Temperature Control
 # Automatically opens/closes heat and cooling valves
 # to try and reach the target temperature
-# intake pump and target temperature are optional
+# heat pump and heat sensor are optional
+# if set heat pump will fill the heat sensor to pressure 40000 or temp 800K
 
 alias targetPipe d0
 alias coolValve d1
@@ -20,10 +21,6 @@ alias vLowTemp r13
 alias vHighTemp r12
 
 start:
-#check Pressure
-sb HASH("StructureBackPressureRegulator") Setting 45000
-sb HASH("StructureBackPressureRegulator") On 1
-
 bdseal heatPump pressureCheck
 
 #check Temp Setting
