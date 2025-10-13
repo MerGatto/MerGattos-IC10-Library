@@ -1,17 +1,26 @@
 ﻿const @STRESSTHRESHOLD = 30
 const @TIMEOUT = 2
 
+# max runtime in ticks (game runs 2 ticks per second)
+const @MAXRUNTIME = 7200
+
 var latestRpm = IC.Rpm
 var latestStress = IC.Stress
 var currentRpm = IC.Rpm
 var currentStress = IC.Stress
+var runtime = 0
 
 #GOTO WaitForReset
 
 Main:
-    yield()    
+    yield()
     # check for error or max capacity
     if (IC.Reagents >= 3000) || (IC.Error == 1) || (IC.Open == 1) then
+        goto EmptyCentrifuge
+    endif
+
+    runtime = runtime + 1
+    if (runtime > @MAXRUNTIME) then
         goto EmptyCentrifuge
     endif
     
@@ -36,6 +45,7 @@ Main:
         latestStress = IC.Stress
         currentRpm = IC.Rpm
         currentStress = IC.Stress
+        runtime = 0
         AdjustSetting(10)
     endif
     
@@ -72,11 +82,21 @@ ENDFUNCTION
 
 EmptyCentrifuge:
     yield()
-    IC.Throttle = 0
-    IC.CombustionLimiter = 0
-    IC.Open = 1
-    if (IC.Reagents < 1) then
-        goto WaitForReset
-    endif
-    goto EmptyCentrifuge
-    
+    var reagentDelta = 0
+    var previousReagents = IC.Reagents
+    var timeout = 0
+    while (IC.Reagents > 1)
+        IC.Throttle = 0
+        IC.CombustionLimiter = 0
+        IC.Open = 1
+        reagentDelta = previousReagents - IC.Reagents
+        previousReagents = IC.Reagents
+        if reagentDelta == 0 then
+            timeout = timeout + 1
+        endif
+        if timeout > 10 then
+            goto WaitForReset
+        endif
+        yield()
+    endwhile
+    goto WaitForReset    

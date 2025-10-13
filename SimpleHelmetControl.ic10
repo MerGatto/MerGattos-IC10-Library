@@ -9,8 +9,6 @@ define MINTEMP 288 # 15c
 
 alias pressure r15
 alias temp r14
-alias xPos r13
-alias yPos r12
 
 main:
 yield
@@ -22,10 +20,6 @@ bnez r0 main
 l pressure db PressureExternal
 # load external temperature
 l temp db TemperatureExternal
-
-#load position
-l xPos db PositionZ
-l yPos db PositionX
 
 # pressure checks
 bgt pressure MAXPRESSURE closeHelmet

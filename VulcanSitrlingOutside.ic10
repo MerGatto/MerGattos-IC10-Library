@@ -15,7 +15,7 @@ yield
 l vAtmosTemp dAtmosSensor Temperature
 bgt vAtmosTemp MAXTEMP deactivate
 
-brdns dChargeReader activate
+bdns dChargeReader activate
 l r0 dChargeReader Setting
 # activate chec
 bge r0 cHighCharge deactivate

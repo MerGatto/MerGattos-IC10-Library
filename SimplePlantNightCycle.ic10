@@ -1,29 +1,31 @@
-define NIGHT_TIME_MINUTES 7
-define DAY_MINUTES 13
-define HYDRO_STATION 1441767298
-define GROW_LIGHT -1758710260
+define LightMinutes 13
+
+define HydroStations 1441767298
+define GrowLights -1758710260
 
 alias minuteCounter r15
+alias nightTimeMinutes r14
 
+sub nightTimeMinutes 20 LightMinutes
 move minuteCounter 0
 j daycycle
 
 daycycle:
 s db Setting minuteCounter
-sb HYDRO_STATION On 1
-sb GROW_LIGHT On 1
+sb HydroStations On 1
+sb GrowLights On 1
 sleep 60
 add minuteCounter minuteCounter 1
-blt minuteCounter DAY_MINUTES daycycle
+blt minuteCounter LightMinutes daycycle
 move minuteCounter 0
 j nightcycle
 
 nightcycle:
 s db Setting minuteCounter
-sb HYDRO_STATION On 0
-sb GROW_LIGHT On 0
+sb HydroStations On 0
+sb GrowLights On 0
 sleep 60
 add minuteCounter minuteCounter 1
-blt minuteCounter NIGHT_TIME_MINUTES nightcycle
+blt minuteCounter nightTimeMinutes nightcycle
 move minuteCounter 0
 j daycycle

@@ -16,6 +16,7 @@ s dVent Mode 1
 
 l r0 db PressureOutput
 slt r0 r0 40000
+s db Mode r0
 
 # Assume NightTime if atmosSensor is not set
 bdns dAtmosSensor Nighttime
