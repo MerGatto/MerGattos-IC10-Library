@@ -1,0 +1,26 @@
+alias sensor d0
+alias vent d1
+
+alias pressureRoom r15
+alias pressureInput r14
+alias pressureOutput r13
+
+define Composter HASH("StructureAdvancedComposter")
+
+main:
+yield
+l pressureRoom sensor Pressure
+l pressureOutput db PressureOutput
+l pressureInput db PressureInput
+sgt r0 pressureRoom 0
+slt r1 pressureInput 40000
+and r0 r0 r1
+s vent On r0
+s vent Mode 1
+slt r0 pressureOutput 40000
+s db Mode r0
+sb Composter On r0
+lb r0 Composter Quantity Average
+sgt r0 r0 0
+sb Composter Activate r0
+j main

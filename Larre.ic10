@@ -1,0 +1,80 @@
+#LArRe farming script            CowsAreEvil
+alias larre d0 #Must be the hydroponics LArRE
+alias bin d1 #The input chute where things get dropped off
+alias counter r10
+define DUMP 7 #Change this number to the station where you have the input chute
+define RESEED 0 # Should seeds be harvested and reseeded? 0 = No, 1 = Yes
+
+reset:
+move counter -1
+
+start:
+s bin On 1
+ls r0 bin 0 Occupied
+seqz r0 r0
+s bin Open r0
+ls r0 larre 0 Occupied
+beqz r0 check
+s larre Setting DUMP
+jal waitlarre
+s larre Activate 1
+jal waitlarre
+j start
+
+check:
+add counter counter 1
+seq r0 counter DUMP
+add counter counter r0
+s larre Setting counter
+s db Setting counter
+l r0 larre Setting
+bne r0 counter reset
+jal waitlarre
+#s db Setting r0
+l r0 larre TargetSlotIndex
+blt r0 0 start
+ls r0 larre 255 Class
+bne r0 11 start
+#check for seeding
+breqz RESEED 3
+ls r0 larre 255 Seeding
+beq r0 -1 start
+ls r0 larre 255 Mature
+beqz r0 start
+
+harvest:
+s larre Activate 1
+jal waitlarre
+ls r0 larre 255 Occupied
+seqz r0 r0
+ls r1 larre 255 Mature
+seqz r1 r1
+breqz RESEED 3
+ls r1 larre 255 Seeding
+seq r1 r1 -1
+or r0 r0 r1
+beqz r0 harvest
+
+# DUMP harvested things
+s larre Setting DUMP
+jal waitlarre
+s larre Activate 1
+jal waitlarre
+brnez RESEED 4
+s larre Activate 1
+jal waitlarre
+j start
+#reseed
+s larre Setting counter
+jal waitlarre
+ls r0 larre 255 Occupied
+bnez r0 start
+s larre Activate 1
+jal waitlarre
+j start
+
+waitlarre:
+yield
+l r0 larre Idle
+breqz r0 -2
+j ra

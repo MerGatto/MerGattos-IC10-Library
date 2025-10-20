@@ -1,6 +1,5 @@
 ﻿##Meta:AddMipsWrapper = sdns,2
 ##Meta:AddMipsWrapper = clr,0
-##Meta:UsePutGetStackCommands=true
 
 #Input sensor is only needed when the AC -
 #got a passive vent on the waste port.
@@ -47,25 +46,27 @@ Main:
         if validAc && validPump then
             var tempOut = currentAc.TemperatureOutput2
             var liquidOut = currentAc.RatioLiquidVolatilesOutput2 + currentAc.RatioLiquidNitrogenOutput2
+            var presIn = currentAc.PressureOutput2
+            var presOut = currentAc.PressureOutput
+            var x = 11145.75           
+            var volumeSetting = x / presIn
             if @IsCooling then
                 liquidOut = currentAc.RatioLiquidVolatilesOutput + currentAc.RatioLiquidNitrogenOutput
                 tempOut = currentAc.TemperatureOutput
+                var volumeSetting2 = x / max(presOut, @PressureLimit)
+                volumeSetting = max(volumeSetting, volumeSetting2)
             endif
-            var presIn = currentAc.PressureOutput2
-            var presOut = currentAc.PressureOutput
             tempOut = max(tempOut, 1)
-            var x = 11145.75
-            var volume = x / presIn
 
             var tempCheck = (tempOut > @TemperatureLimit)
             var pressureCheck = (presOut < 100)
             var pressureLimitCheck = (not(@IsCooling) || (presOut < @PressureLimit))
-            var liquidCheck = (produceLiquids && (liquidOut < 0.1)) || liquidOut == 0
+            var liquidCheck = (produceLiquids && (liquidOut < 0.05)) || liquidOut == 0
             
             var activate = (tempCheck || pressureCheck) && pressureLimitCheck && liquidCheck
             IC.Device[ACUnit].Name[namePair].Mode = activate || (currentAc.PressureInput > 0)
             IC.Device[VolumePump].Name[namePair].On = activate
-            IC.Device[VolumePump].Name[namePair].Setting = volume
+            IC.Device[VolumePump].Name[namePair].Setting = volumeSetting
         endif       
     next    
     goto Main
