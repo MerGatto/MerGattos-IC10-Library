@@ -39,6 +39,9 @@ add vBatteryMax r0 r1
 div vCharge vBatteryChargeAbs vBatteryMax
 s db Setting vCharge
 
+brdns chargeReader 2
+s chargeReader Setting vCharge
+
 bdseal chargeDisplay HandleDisplay
 brdns d4 2
 s d4 Setting vCharge

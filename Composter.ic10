@@ -12,7 +12,7 @@ yield
 l pressureRoom sensor Pressure
 l pressureOutput db PressureOutput
 l pressureInput db PressureInput
-sgt r0 pressureRoom 0
+sgt r0 pressureRoom 20
 slt r1 pressureInput 40000
 and r0 r0 r1
 s vent On r0

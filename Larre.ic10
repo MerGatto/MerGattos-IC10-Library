@@ -2,17 +2,25 @@
 alias larre d0 #Must be the hydroponics LArRE
 alias bin d1 #The input chute where things get dropped off
 alias counter r10
-define DUMP 7 #Change this number to the station where you have the input chute
+alias step r11
+move step 1
+define DUMP 28 #Change this number to the station where you have the input chute
 define RESEED 0 # Should seeds be harvested and reseeded? 0 = No, 1 = Yes
 
 reset:
+blt step 0 resetToMin
+s larre Setting 999
+l r0 larre Setting
+move counter r0
+add counter counter 1
+move step -1
+j start
+resetToMin:
 move counter -1
+move step 1
 
 start:
-s bin On 1
-ls r0 bin 0 Occupied
-seqz r0 r0
-s bin Open r0
+beqz RESEED check
 ls r0 larre 0 Occupied
 beqz r0 check
 s larre Setting DUMP
@@ -22,8 +30,14 @@ jal waitlarre
 j start
 
 check:
-add counter counter 1
+s bin On 1
+ls r0 bin 0 Occupied
+seqz r0 r0
+s bin Open r0
+add counter counter step
 seq r0 counter DUMP
+brnez RESEED 2
+bnez r0 dump # if not in reseed mode, dump when counter reaches DUMP
 add counter counter r0
 s larre Setting counter
 s db Setting counter
@@ -32,38 +46,54 @@ bne r0 counter reset
 jal waitlarre
 #s db Setting r0
 l r0 larre TargetSlotIndex
-blt r0 0 start
+blt r0 0 check
 ls r0 larre 255 Class
-bne r0 11 start
+bne r0 11 check
+
 #check for seeding
 breqz RESEED 3
 ls r0 larre 255 Seeding
 beq r0 -1 start
+#br no reseed
 ls r0 larre 255 Mature
-beqz r0 start
+beqz r0 check
 
 harvest:
 s larre Activate 1
 jal waitlarre
 ls r0 larre 255 Occupied
 seqz r0 r0
-ls r1 larre 255 Mature
-seqz r1 r1
-breqz RESEED 3
+
+beqz RESEED hoppercheck #reseed?
 ls r1 larre 255 Seeding
 seq r1 r1 -1
 or r0 r0 r1
 beqz r0 harvest
+j dump
+# no reseed mode check for hoppers
+hoppercheck:
+ls r0 larre 0 Occupied # hopper occupied
+ls r1 larre 1 Occupied # hopper occupied
+and r0 r0 r1
+bnez r0 dump # hopper not occupied and no reseed mode, just go next
+ls r0 larre 255 Mature
+beqz r0 check
+j harvest
 
+dump:
 # DUMP harvested things
 s larre Setting DUMP
 jal waitlarre
 s larre Activate 1
 jal waitlarre
+
 brnez RESEED 4
+s bin Open 0
+sleep 1
 s larre Activate 1
 jal waitlarre
 j start
+#br
 #reseed
 s larre Setting counter
 jal waitlarre
@@ -75,6 +105,10 @@ j start
 
 waitlarre:
 yield
+move r1 0
+waitloop:
+add r1 r1 1
+bgt r1 60 ra
 l r0 larre Idle
-breqz r0 -2
+beqz r0 waitloop
 j ra
