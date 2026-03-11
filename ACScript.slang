@@ -3,14 +3,16 @@ device liquidSwitch = "d0";
 
 const ProduceLiquids = false;
 const HasLiquidSwitch = true;
-const TemperatureLimit = -140c;
-const MaxTempDelta = 100;
+const TemperatureLimit = 0;
+const MaxTempDelta = 110;
 const ACHash = hash("StructureAirConditioner");
 
 
+const maxLayer = 3;
 const layer0Name = hash("0");
 const layer1Name = hash("1");
 const layer2Name = hash("2");
+const layer3Name = hash("3");
 
 let i = -1;
 let currentLayerName = layer0Name;
@@ -38,13 +40,14 @@ loop {
     }
 
     i = i+1;
-    if (i > 2) {
+    if (i > 3) {
       i = 0;
       currentLayerName = layer0Name;
     }
 
     if (i == 1) { currentLayerName = layer1Name;}
     if (i == 2) { currentLayerName = layer2Name;}
+    if (i == 3) { currentLayerName = layer3Name;}
 
     let validAc =
       lbn(ACHash, currentLayerName, "PrefabHash", "Minimum") == ACHash;
@@ -64,7 +67,8 @@ loop {
         lbn(ACHash, currentLayerName, "RatioLiquidVolatilesOutput", "Maximum")
         + lbn(ACHash, currentLayerName, "RatioLiquidNitrogenOutput", "Maximum");
     }
-    let tempOk = tempCoolside > TemperatureLimit && tempDelta <= MaxTempDelta;
+    let tempOk = (tempCoolside > TemperatureLimit && tempDelta <= MaxTempDelta)
+                  || tempCoolside == 0;
     let pressureOk = true;
     let liquidOk = (produceLiquids && (liquidOut < 0.05)) || (liquidOut == 0);
     let activate = tempOk && pressureOk && liquidOk;

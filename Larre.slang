@@ -4,6 +4,10 @@ device bin = "d1";
 
 let step = 1;
 let incrementLocation = false;
+larre.Setting = 999;
+let maxLocation = larre.Setting;
+larre.Setting = -999;
+let minLocation = larre.Setting;
 
 let binLocation = -999;
 
@@ -19,10 +23,6 @@ fn waitLarre() {
 loop {
   if (incrementLocation) {
     let counter = larre.PositionX + step;
-    larre.Setting = 999;
-    let maxLocation = larre.Setting;
-    larre.Setting = -999;
-    let minLocation = larre.Setting;
     if (counter < minLocation || counter > maxLocation) {
       step = -step;
       counter = counter + step;
