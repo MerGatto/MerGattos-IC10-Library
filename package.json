@@ -1,0 +1,8 @@
+{
+  "name": "mergattos-ic10-library",
+  "private": true,
+  "scripts": {
+    "build": "npm run compile:slang",
+    "compile:slang": "node ./scripts/compile-all-slang.js"
+  }
+}
